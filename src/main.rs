@@ -1,20 +1,42 @@
-use std::error::Error;
-use std::ffi::OsString;
-use std::{env, process};
-use rocket::{Build, Rocket};
-use serde::Deserialize;
-
 #[macro_use]
 extern crate rocket;
 
-#[get("/")]
-fn index() -> &'static str {
-    "Hello, world!"
+use rocket::{Build, Rocket};
+use rocket::form::Form;
+use rocket::fs::{FileServer, TempFile};
+use rocket::http::ContentType;
+use serde::Deserialize;
+
+
+//todo can i remove this type?
+#[derive(FromForm)]
+pub struct FileUploadForm<'f> {
+    #[field(validate = ext(ContentType::CSV))]
+    file: TempFile<'f>,
+}
+
+//todo nice error handling
+//todo does this need to be async?
+#[post("/upload", data = "<form>")]
+pub async fn upload(form: Form<FileUploadForm<'_>>) {
+    match form.file.path() {
+        Some(path) => {
+            let mut reader = csv::Reader::from_path(path).unwrap();
+
+            for result in reader.deserialize() {
+                let record: TastyworksRecord = result.unwrap();
+                println!("{:?}", record);
+            }
+        }
+        None => ()
+    }
 }
 
 #[launch]
 fn rocket() -> Rocket<Build> {
-    rocket::build().mount("/", routes![index])
+    rocket::build()
+        .mount("/", routes![upload])
+        .mount("/", FileServer::from("static/"))
 }
 
 //todo add everything in the proper type
@@ -24,21 +46,4 @@ struct TastyworksRecord {
     fees: String,
     #[serde(rename = "Price")]
     price: String,
-}
-
-fn run() -> Result<(), Box<dyn Error>> {
-    let file_path = get_first_arg()?;
-    let mut rdr = csv::Reader::from_path(file_path)?;
-    for result in rdr.deserialize() {
-        let record: TastyworksRecord = result?;
-        println!("{:?}", record);
-    }
-    Ok(())
-}
-
-fn get_first_arg() -> Result<OsString, Box<dyn Error>> {
-    match env::args_os().nth(1) {
-        None => Err(From::from("expected 1 argument, but got none")),
-        Some(file_path) => Ok(file_path),
-    }
 }
