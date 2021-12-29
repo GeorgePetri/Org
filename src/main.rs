@@ -7,7 +7,6 @@ use rocket::fs::{FileServer, TempFile};
 use rocket::http::ContentType;
 use serde::Deserialize;
 
-
 //todo can i remove this type?
 #[derive(FromForm)]
 pub struct FileUploadForm<'f> {
