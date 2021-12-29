@@ -1,7 +1,21 @@
 use std::error::Error;
 use std::ffi::OsString;
 use std::{env, process};
+use rocket::{Build, Rocket};
 use serde::Deserialize;
+
+#[macro_use]
+extern crate rocket;
+
+#[get("/")]
+fn index() -> &'static str {
+    "Hello, world!"
+}
+
+#[launch]
+fn rocket() -> Rocket<Build> {
+    rocket::build().mount("/", routes![index])
+}
 
 //todo add everything in the proper type
 #[derive(Debug, Deserialize)]
@@ -10,13 +24,6 @@ struct TastyworksRecord {
     fees: String,
     #[serde(rename = "Price")]
     price: String,
-}
-
-fn main() {
-    if let Err(err) = run() {
-        println!("{}", err);
-        process::exit(1);
-    }
 }
 
 fn run() -> Result<(), Box<dyn Error>> {
