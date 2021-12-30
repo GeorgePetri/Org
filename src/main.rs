@@ -5,9 +5,9 @@ use rocket::{Build, Rocket};
 use rocket::form::Form;
 use rocket::fs::{FileServer, TempFile};
 use rocket::http::ContentType;
+use rocket::response::Redirect;
 use serde::Deserialize;
 
-//todo can i remove this type?
 #[derive(FromForm)]
 pub struct FileUploadForm<'f> {
     #[field(validate = ext(ContentType::CSV))]
@@ -17,9 +17,8 @@ pub struct FileUploadForm<'f> {
 //todo nice error handling
 //todo does this need to be async?
 //todo add tests
-//todo redirect index
 #[post("/upload", data = "<form>")]
-pub async fn upload(form: Form<FileUploadForm<'_>>) {
+pub async fn upload(form: Form<FileUploadForm<'_>>) -> Redirect {
     match form.file.path() {
         Some(path) => {
             let mut reader = csv::Reader::from_path(path).unwrap();
@@ -30,7 +29,9 @@ pub async fn upload(form: Form<FileUploadForm<'_>>) {
             }
         }
         None => ()
-    }
+    };
+
+    Redirect::to("/")
 }
 
 #[launch]
@@ -44,7 +45,6 @@ fn rocket() -> Rocket<Build> {
 struct TastyworksRecord {
     #[serde(rename = "Date/Time")]
     date_time: String,
-    //todo change type
     #[serde(rename = "Transaction Code")]
     transaction_code: String,
     #[serde(rename = "Transaction Subcode")]
