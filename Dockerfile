@@ -11,6 +11,7 @@ FROM debian:buster-slim
 COPY --from=build /usr/local/cargo/bin/org /usr/local/bin/org
 COPY --from=build /usr/src/org/static /static
 
+ENV ROCKET_ADDRESS=0.0.0.0
 EXPOSE 8000
 
 CMD ["org"]
