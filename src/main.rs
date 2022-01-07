@@ -1,10 +1,12 @@
 #[macro_use]
 extern crate rocket;
 
+use std::env;
+
 use rocket::{Build, Rocket};
 use rocket::form::Form;
 use rocket::fs::{FileServer, TempFile};
-use rocket::http::ContentType;
+use rocket::http::{ContentType, RawStr};
 use rocket::response::Redirect;
 use serde::Deserialize;
 
@@ -32,6 +34,26 @@ pub async fn upload(form: Form<FileUploadForm<'_>>) -> Redirect {
     };
 
     Redirect::to("/")
+}
+
+//todo add state
+#[post("/login-microsoft")]
+pub fn login_microsoft() -> Redirect {
+    let tenant = env::var("ORG_MICROSOFT_TENANT").unwrap();
+    let client_id = env::var("ORG_MICROSOFT_CLIENT_ID").unwrap();
+    let redirect_url = env::var("ORG_MICROSOFT_REDIRECT_URL").unwrap();
+    let redirect_url = RawStr::percent_encode(RawStr::new(&redirect_url));
+    let scope = env::var("ORG_MICROSOFT_SCOPE").unwrap();
+
+    let uri = format!("
+https://login.microsoftonline.com/{}/oauth2/v2.0/authorize?\
+client_id={}
+&response_type=code
+&redirect_uri={}
+&response_mode=query
+&scope={}", tenant, client_id, redirect_url, scope);
+
+    Redirect::to(uri)
 }
 
 #[launch]
