@@ -14,7 +14,7 @@ RUN cargo build --release --target aarch64-unknown-linux-musl
 FROM --platform=linux/arm64/v8 alpine:3.12
 
 WORKDIR /app
-COPY --from=build /app/target/release ./
+COPY --from=build /app/target/aarch64-unknown-linux-musl/release/org ./
 COPY --from=build /app/static ./static
 
 ENV ROCKET_ADDRESS=0.0.0.0
