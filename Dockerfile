@@ -1,7 +1,9 @@
 FROM rust:1.57 as build
 
+RUN rustup target add aarch64-unknown-linux-musl
+
 WORKDIR /app
-#COPY .cargo ./.cargo
+COPY .cargo ./.cargo
 COPY Cargo.toml Cargo.lock ./
 COPY src ./src
 COPY static ./static
