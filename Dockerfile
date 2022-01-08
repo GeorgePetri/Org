@@ -1,17 +1,21 @@
 FROM rust:1.57 as build
 
-WORKDIR /usr/src/org
-COPY . .
+WORKDIR /app
+#COPY .cargo ./.cargo
+COPY Cargo.toml Cargo.lock ./
+COPY src ./src
+COPY static ./static
 
-RUN cargo install --path .
+RUN cargo build --release
 
 FROM debian:buster-slim
 #FROM alpine:3.15.0
 
-COPY --from=build /usr/local/cargo/bin/org /usr/local/bin/org
-COPY --from=build /usr/src/org/static /static
+WORKDIR /app
+COPY --from=build /app/target/release ./
+COPY --from=build /app/static ./static
 
 ENV ROCKET_ADDRESS=0.0.0.0
 EXPOSE 8000
 
-CMD ["org"]
+CMD ["/app/org"]
