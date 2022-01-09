@@ -6,8 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-<div class="container">
-    <div class="row">
+<div>
+    <h4>Login Microsoft</h4>
+    <form action="/login-microsoft" method="post">
+        <input type="submit" value="Login">
+    </form>
+</div>
+<div>
+    <div>
         <h4>Upload tastyworks csv</h4>
         <form action="/upload" method="post" enctype="multipart/form-data">
             <input name="file" type="file" accept="text/csv">

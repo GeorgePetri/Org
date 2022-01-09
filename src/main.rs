@@ -7,6 +7,7 @@ use rocket::{Build, Rocket};
 use rocket::form::Form;
 use rocket::fs::{FileServer, TempFile};
 use rocket::http::{ContentType, RawStr};
+use rocket::http::uri::{Absolute, Uri};
 use rocket::response::Redirect;
 use serde::Deserialize;
 
@@ -34,7 +35,7 @@ pub async fn upload(form: Form<FileUploadForm<'_>>) -> Redirect {
         None => ()
     };
 
-    Redirect::to("/")
+    Redirect::to(uri!("/"))
 }
 
 //todo add state
@@ -48,19 +49,24 @@ pub fn login_microsoft() -> Redirect {
 
     let uri = format!("
 https://login.microsoftonline.com/{}/oauth2/v2.0/authorize?\
-client_id={}
-&response_type=code
-&redirect_uri={}
-&response_mode=query
+client_id={}\
+&response_type=code\
+&redirect_uri={}\
+&response_mode=query\
 &scope={}", tenant, client_id, redirect_url, scope);
 
     Redirect::to(uri)
 }
 
+#[get("/login-microsoft-callback")]
+pub fn login_microsoft_callback() {
+    println!("callback called");
+}
+
 #[launch]
 fn rocket() -> Rocket<Build> {
     rocket::build()
-        .mount("/", routes![upload])
+        .mount("/", routes![upload, login_microsoft, login_microsoft_callback])
         .mount("/", FileServer::from("static/"))
 }
 
