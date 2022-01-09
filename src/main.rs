@@ -55,6 +55,8 @@ client_id={}\
 &response_mode=query\
 &scope={}", tenant, client_id, redirect_url, scope);
 
+    let x = Uri::parse::<Absolute>(&uri.to_string());
+
     Redirect::to(uri)
 }
 
