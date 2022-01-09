@@ -19,6 +19,7 @@ pub struct FileUploadForm<'f> {
 //todo nice error handling
 //todo does this need to be async?
 //todo add tests
+//todo swap out allocator due to musl slowness
 #[post("/upload", data = "<form>")]
 pub async fn upload(form: Form<FileUploadForm<'_>>) -> Redirect {
     match form.file.path() {
