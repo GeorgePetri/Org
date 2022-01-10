@@ -43,19 +43,17 @@ pub async fn upload(form: Form<FileUploadForm<'_>>) -> Redirect {
 pub fn login_microsoft() -> Redirect {
     let tenant = env::var("ORG_MICROSOFT_TENANT").unwrap();
     let client_id = env::var("ORG_MICROSOFT_CLIENT_ID").unwrap();
-    let redirect_url = env::var("ORG_MICROSOFT_REDIRECT_URL").unwrap();
-    let redirect_url = RawStr::percent_encode(RawStr::new(&redirect_url));
+    let redirect_uri = env::var("ORG_MICROSOFT_REDIRECT_URI").unwrap();
+    let redirect_uri = RawStr::percent_encode(RawStr::new(&redirect_uri));
     let scope = env::var("ORG_MICROSOFT_SCOPE").unwrap();
 
-    let uri = format!("
+    let uri = format!("\
 https://login.microsoftonline.com/{}/oauth2/v2.0/authorize?\
 client_id={}\
 &response_type=code\
 &redirect_uri={}\
 &response_mode=query\
-&scope={}", tenant, client_id, redirect_url, scope);
-
-    let x = Uri::parse::<Absolute>(&uri.to_string());
+&scope={}", tenant, client_id, redirect_uri, scope);
 
     Redirect::to(uri)
 }
