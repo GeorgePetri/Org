@@ -21,6 +21,7 @@ pub struct FileUploadForm<'f> {
 //todo does this need to be async?
 //todo add tests
 //todo swap out allocator due to musl slowness
+//todo redis cache?
 #[post("/upload", data = "<form>")]
 pub async fn upload(form: Form<FileUploadForm<'_>>) -> Redirect {
     match form.file.path() {
@@ -46,6 +47,7 @@ pub fn login_microsoft() -> Redirect {
     let redirect_uri = env::var("ORG_MICROSOFT_REDIRECT_URI").unwrap();
     let redirect_uri = RawStr::percent_encode(RawStr::new(&redirect_uri));
     let scope = env::var("ORG_MICROSOFT_SCOPE").unwrap();
+    let scope = RawStr::percent_encode(RawStr::new(&scope));
 
     let uri = format!("\
 https://login.microsoftonline.com/{}/oauth2/v2.0/authorize?\
@@ -58,9 +60,17 @@ client_id={}\
     Redirect::to(uri)
 }
 
-#[get("/login-microsoft-callback")]
-pub fn login_microsoft_callback() {
-    println!("callback called");
+//todo fix copy pasted code
+#[get("/login-microsoft-callback?<code>")]
+pub async fn login_microsoft_callback(code: String) {
+    println!("{}", code);
+
+    let tenant = env::var("ORG_MICROSOFT_TENANT").unwrap();
+
+    let uri = format!("https://login.microsoftonline.com/{}/oauth2/v2.0/token?", tenant);
+    let response = reqwest::get(uri).await.unwrap();
+
+    println!("{}", response.status());
 }
 
 #[launch]
