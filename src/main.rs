@@ -22,6 +22,8 @@ pub struct FileUploadForm<'f> {
 //todo add tests
 //todo swap out allocator due to musl slowness
 //todo redis cache?
+//todo enable tls
+//todo fix alpine openssl reqwest
 #[post("/upload", data = "<form>")]
 pub async fn upload(form: Form<FileUploadForm<'_>>) -> Redirect {
     match form.file.path() {
