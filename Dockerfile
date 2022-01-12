@@ -12,7 +12,7 @@ COPY static ./static
 RUN cargo build --release --target aarch64-unknown-linux-gnu
 
 #coreos?
-FROM --platform=linux/arm64/v8 debian:bullseye-slim
+FROM --platform=linux/arm64/v8 debian:buster-slim
 
 WORKDIR /app
 COPY --from=build /app/target/aarch64-unknown-linux-gnu/release/org ./
