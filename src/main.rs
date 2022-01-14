@@ -16,10 +16,7 @@ pub struct FileUploadForm<'f> {
     file: TempFile<'f>,
 }
 
-//todo nice error handling
 //todo does this need to be async?
-//todo add tests
-//todo redis cache?
 #[post("/upload", data = "<form>")]
 pub async fn upload(form: Form<FileUploadForm<'_>>) -> Redirect {
     match form.file.path() {
@@ -37,6 +34,9 @@ pub async fn upload(form: Form<FileUploadForm<'_>>) -> Redirect {
     Redirect::to(uri!("/"))
 }
 
+//todo nice error handling
+//todo add tests
+//todo redis cache?
 #[launch]
 fn rocket() -> Rocket<Build> {
     rocket::build()
