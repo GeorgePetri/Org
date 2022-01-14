@@ -9,6 +9,7 @@ use rocket::response::Redirect;
 use serde::Deserialize;
 
 mod microsoft;
+mod secrets;
 
 #[derive(FromForm)]
 pub struct FileUploadForm<'f> {
