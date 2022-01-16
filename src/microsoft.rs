@@ -1,27 +1,25 @@
 use std::collections::HashMap;
 
-use reqwest::Client;
-use rocket::http::RawStr;
+use reqwest::Url;
 use rocket::response::Redirect;
 use serde::Deserialize;
 
 use crate::secrets;
 
 //todo add state
-//todo is there a helper to create the uri easier?
 #[post("/login-microsoft")]
 pub fn login_microsoft() -> Redirect {
-    let redirect_uri_encoded = RawStr::percent_encode(RawStr::new(&secrets::redirect_uri())).to_string();
-    let scope_encoded = RawStr::percent_encode(RawStr::new(&secrets::scope())).to_string();
-    let uri = format!("\
-https://login.microsoftonline.com/{}/oauth2/v2.0/authorize?\
-client_id={}\
-&response_type=code\
-&redirect_uri={}\
-&response_mode=query\
-&scope={}", secrets::tenant(), secrets::client_id(), redirect_uri_encoded, scope_encoded);
+    let mut uri = Url::parse(&format!("https://login.microsoftonline.com/{}/oauth2/v2.0/authorize", secrets::tenant()))
+        .unwrap();
 
-    Redirect::to(uri)
+    uri.query_pairs_mut()
+        .append_pair("client_id", &secrets::client_id())
+        .append_pair("response_type", "code")
+        .append_pair("redirect_uri", &secrets::redirect_uri())
+        .append_pair("response_mode", "query")
+        .append_pair("scope", &secrets::scope());
+
+    Redirect::to(uri.to_string())
 }
 
 #[get("/login-microsoft-callback?<code>")]
