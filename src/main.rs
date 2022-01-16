@@ -17,9 +17,8 @@ pub struct FileUploadForm<'f> {
     file: TempFile<'f>,
 }
 
-//todo does this need to be async?
 #[post("/upload", data = "<form>")]
-pub async fn upload(form: Form<FileUploadForm<'_>>) -> Redirect {
+pub fn upload(form: Form<FileUploadForm<'_>>) -> Redirect {
     match form.file.path() {
         Some(path) => {
             let mut reader = csv::Reader::from_path(path).unwrap();
