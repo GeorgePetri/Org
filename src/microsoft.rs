@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use redis::Commands;
+use redis::{Commands, Connection};
 use reqwest::Url;
 use rocket::response::Redirect;
 use serde::Deserialize;
@@ -48,11 +48,7 @@ pub async fn login_microsoft_callback(code: String) -> Redirect {
         .await
         .unwrap();
 
-    let redis_client = redis::Client::open("redis://127.0.0.1/")
-        .unwrap();
-
-    let mut redis_connection = redis_client.get_connection()
-        .unwrap();
+    let mut redis_connection = redis_connection();
 
     let _: () = redis_connection.set_ex("access_token", token.access_token, token.expires_in as usize).unwrap();
 
@@ -61,6 +57,14 @@ pub async fn login_microsoft_callback(code: String) -> Redirect {
     println!("{}", token_from_redis);
 
     Redirect::to("/")
+}
+
+fn redis_connection() -> Connection {
+    let redis_client = redis::Client::open("redis://127.0.0.1/")
+        .unwrap();
+
+    redis_client.get_connection()
+        .unwrap()
 }
 
 #[derive(Debug, Deserialize)]

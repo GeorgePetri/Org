@@ -154,11 +154,11 @@ version = "0.4.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "670ad68c9088c2a963aaa298cb369688cf3f9465ce5e2d4ca10e6e0098a1ce73"
 dependencies = [
-    "libc",
-    "num-integer",
-    "num-traits",
-    "time 0.1.44",
-    "winapi",
+ "libc",
+ "num-integer",
+ "num-traits",
+ "time 0.1.44",
+ "winapi",
 ]
 
 [[package]]
@@ -167,8 +167,8 @@ version = "4.6.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "50b727aacc797f9fc28e355d21f34709ac4fc9adecfe470ad07b8f4464f53062"
 dependencies = [
-    "bytes",
-    "memchr",
+ "bytes",
+ "memchr",
 ]
 
 [[package]]
@@ -248,8 +248,8 @@ dependencies = [
  "bitflags",
  "proc-macro2",
  "proc-macro2-diagnostics",
-    "quote",
-    "syn",
+ "quote",
+ "syn",
 ]
 
 [[package]]
@@ -781,12 +781,12 @@ checksum = "da32515d9f6e6e489d7bc9d84c71b060db7247dc035bbe44eac88cf87486d8d5"
 name = "org"
 version = "0.1.0"
 dependencies = [
-    "chrono",
-    "csv",
-    "redis",
-    "reqwest",
-    "rocket",
-    "serde",
+ "chrono",
+ "csv",
+ "redis",
+ "reqwest",
+ "rocket",
+ "serde",
 ]
 
 [[package]]
@@ -935,7 +935,7 @@ version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d51e9f596de227fda2ea6c84607f5558e196eeaf43c986b724ba4fb8fdf497e7"
 dependencies = [
-    "rand_core",
+ "rand_core",
 ]
 
 [[package]]
@@ -944,13 +944,13 @@ version = "0.21.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1a80b5f38d7f5a020856a0e16e40a9cfabf88ae8f0e4c2dcd8a3114c1e470852"
 dependencies = [
-    "async-trait",
-    "combine",
-    "dtoa",
-    "itoa 0.4.8",
-    "percent-encoding",
-    "sha1",
-    "url",
+ "async-trait",
+ "combine",
+ "dtoa",
+ "itoa 0.4.8",
+ "percent-encoding",
+ "sha1",
+ "url",
 ]
 
 [[package]]
@@ -959,7 +959,7 @@ version = "0.2.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8383f39639269cde97d255a32bdb68c047337295414940c68bdd30c2e13203ff"
 dependencies = [
-    "bitflags",
+ "bitflags",
 ]
 
 [[package]]
