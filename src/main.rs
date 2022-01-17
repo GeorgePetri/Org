@@ -36,7 +36,6 @@ pub fn upload(form: Form<FileUploadForm<'_>>) -> Redirect {
 
 //todo nice error handling
 //todo add tests
-//todo redis cache?
 #[launch]
 fn rocket() -> Rocket<Build> {
     rocket::build()
