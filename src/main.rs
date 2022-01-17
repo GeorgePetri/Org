@@ -40,7 +40,7 @@ pub fn upload(form: Form<FileUploadForm<'_>>) -> Redirect {
 #[launch]
 fn rocket() -> Rocket<Build> {
     rocket::build()
-        .mount("/", routes![upload, microsoft::login_microsoft, microsoft::login_microsoft_callback])
+        .mount("/", routes![upload, microsoft::login_microsoft, microsoft::login_microsoft_callback, microsoft::test])
         .mount("/", FileServer::from("static/"))
 }
 

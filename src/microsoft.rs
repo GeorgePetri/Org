@@ -52,11 +52,24 @@ pub async fn login_microsoft_callback(code: String) -> Redirect {
 
     let _: () = redis_connection.set_ex("access_token", token.access_token, token.expires_in as usize).unwrap();
 
-    let token_from_redis: String = redis_connection.get("access_token").unwrap();
-
-    println!("{}", token_from_redis);
-
     Redirect::to("/")
+}
+
+#[get("/test")]
+pub async fn test() {
+    let client = reqwest::Client::new();
+
+    let response = client.get("https://graph.microsoft.com/v1.0/me")
+        .bearer_auth(access_token())
+        .send()
+        .await
+        .unwrap();
+
+    let text = response.text()
+        .await
+        .unwrap();
+
+    println!("{}", text);
 }
 
 fn redis_connection() -> Connection {
@@ -65,6 +78,12 @@ fn redis_connection() -> Connection {
 
     redis_client.get_connection()
         .unwrap()
+}
+
+fn access_token() -> String {
+    let mut connection = redis_connection();
+
+    connection.get("access_token").unwrap()
 }
 
 #[derive(Debug, Deserialize)]
