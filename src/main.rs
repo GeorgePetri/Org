@@ -12,6 +12,7 @@ use serde::Deserialize;
 
 mod microsoft;
 mod secrets;
+mod redis_data;
 
 #[derive(FromForm)]
 pub struct FileUploadForm<'f> {
@@ -45,9 +46,11 @@ fn rocket() -> Rocket<Build> {
 }
 
 //todo add logout feature
+//todo how to format this nicely
 #[get("/")]
 async fn index() -> Option<NamedFile> {
-    let path = if true { "static/login.html" } else { "static/index.html" };
+    let path = if redis_data::has_access_token()
+    { "static/index.html" } else { "static/login.html" };
     NamedFile::open(Path::new(path)).await.ok()
 }
 

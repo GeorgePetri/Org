@@ -5,7 +5,7 @@ use reqwest::Url;
 use rocket::response::Redirect;
 use serde::Deserialize;
 
-use crate::secrets;
+use crate::{redis_data, secrets};
 
 //todo add state
 #[post("/login-microsoft")]
@@ -48,7 +48,7 @@ pub async fn login_callback(code: String) -> Redirect {
         .await
         .unwrap();
 
-    let mut redis_connection = redis_connection();
+    let mut redis_connection = redis_data::redis_connection();
 
     let _: () = redis_connection.set_ex("access_token", token.access_token, token.expires_in as usize).unwrap();
 
@@ -60,7 +60,7 @@ pub async fn test() {
     let client = reqwest::Client::new();
 
     let response = client.get("https://graph.microsoft.com/v1.0/me")
-        .bearer_auth(access_token())
+        .bearer_auth(redis_data::access_token())
         .send()
         .await
         .unwrap();
@@ -70,20 +70,6 @@ pub async fn test() {
         .unwrap();
 
     println!("{}", text);
-}
-
-fn redis_connection() -> Connection {
-    let redis_client = redis::Client::open("redis://127.0.0.1/")
-        .unwrap();
-
-    redis_client.get_connection()
-        .unwrap()
-}
-
-fn access_token() -> String {
-    let mut connection = redis_connection();
-
-    connection.get("access_token").unwrap()
 }
 
 #[derive(Debug, Deserialize)]
