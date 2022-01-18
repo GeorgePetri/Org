@@ -1,9 +1,11 @@
 #[macro_use]
 extern crate rocket;
 
+use std::path::Path;
+
 use rocket::{Build, Rocket};
 use rocket::form::Form;
-use rocket::fs::{FileServer, TempFile};
+use rocket::fs::{FileServer, NamedFile, TempFile};
 use rocket::http::ContentType;
 use rocket::response::Redirect;
 use serde::Deserialize;
@@ -39,8 +41,14 @@ pub fn upload(form: Form<FileUploadForm<'_>>) -> Redirect {
 #[launch]
 fn rocket() -> Rocket<Build> {
     rocket::build()
-        .mount("/", routes![upload, microsoft::login, microsoft::login_callback, microsoft::test])
-        .mount("/", FileServer::from("static/"))
+        .mount("/", routes![index, upload, microsoft::login, microsoft::login_callback, microsoft::test])
+}
+
+//todo add logout feature
+#[get("/")]
+async fn index() -> Option<NamedFile> {
+    let path = if true { "static/login.html" } else { "static/index.html" };
+    NamedFile::open(Path::new(path)).await.ok()
 }
 
 #[derive(Debug, Deserialize)]
