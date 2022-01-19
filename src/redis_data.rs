@@ -3,7 +3,7 @@ use redis::{Commands, Connection};
 //todo rename this file
 
 pub fn redis_connection() -> Connection {
-    let redis_client = redis::Client::open("redis://127.0.0.1/")
+    let redis_client = redis::Client::open("redis://localhost/")
         .unwrap();
 
     redis_client.get_connection()
