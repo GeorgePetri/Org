@@ -20,6 +20,13 @@ pub struct FileUploadForm<'f> {
     file: TempFile<'f>,
 }
 
+//save the uploaded file to drive as a source of truth
+//use a persistent session for manipulating the excel
+//try setup a dir in drive for org files
+//create the excel there, if not existing
+//create a worksheet if not existing
+//merge uploaded data in excel
+//save and close session
 #[post("/upload", data = "<form>")]
 pub fn upload(form: Form<FileUploadForm<'_>>) -> Redirect {
     match form.file.path() {
