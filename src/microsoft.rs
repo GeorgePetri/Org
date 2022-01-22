@@ -10,7 +10,7 @@ use crate::{redis_data, secrets};
 //todo add state
 #[post("/login-microsoft")]
 pub fn login() -> Redirect {
-    let mut uri = Url::parse(&format!("https://login.microsoftonline.com/{}/oauth2/v2.0/authorize", secrets::tenant()))
+    let mut uri = Url::parse("https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize")
         .unwrap();
 
     uri.query_pairs_mut()
@@ -33,7 +33,7 @@ pub async fn login_callback(code: String) -> Redirect {
     params.insert("grant_type", "authorization_code".to_string());
     params.insert("client_secret", secrets::client_secret());
 
-    let uri = format!("https://login.microsoftonline.com/{}/oauth2/v2.0/token", secrets::tenant());
+    let uri = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
 
     //todo reuse client
     let client = reqwest::Client::new();
@@ -59,7 +59,7 @@ pub async fn login_callback(code: String) -> Redirect {
 pub async fn test() {
     let client = reqwest::Client::new();
 
-    let response = client.get("https://graph.microsoft.com/v1.0/me")
+    let response = client.get("https://graph.microsoft.com/v1.0/me/drive/root/children")
         .bearer_auth(redis_data::access_token())
         .send()
         .await

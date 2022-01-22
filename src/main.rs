@@ -5,7 +5,7 @@ use std::path::Path;
 
 use rocket::{Build, Rocket};
 use rocket::form::Form;
-use rocket::fs::{FileServer, NamedFile, TempFile};
+use rocket::fs::{NamedFile, TempFile};
 use rocket::http::ContentType;
 use rocket::response::Redirect;
 use serde::Deserialize;
@@ -20,7 +20,6 @@ pub struct FileUploadForm<'f> {
     file: TempFile<'f>,
 }
 
-//save the uploaded file to drive as a source of truth
 //use a persistent session for manipulating the excel
 //try setup a dir in drive for org files
 //create the excel there, if not existing
@@ -31,17 +30,30 @@ pub struct FileUploadForm<'f> {
 pub fn upload(form: Form<FileUploadForm<'_>>) -> Redirect {
     match form.file.path() {
         Some(path) => {
-            let mut reader = csv::Reader::from_path(path).unwrap();
-
-            for result in reader.deserialize() {
-                let record: TastyworksRecord = result.unwrap();
-                println!("{:?}", record);
-            }
+            ensure_drive_dirs_exist();
+            upload_to_drive(&form.file);
+            todo(&form.file);
         }
         None => ()
     };
 
     Redirect::to(uri!("/"))
+}
+
+fn ensure_drive_dirs_exist() {}
+
+//todo impl
+fn upload_to_drive(file: &TempFile) {}
+
+//todo impl
+fn todo(file: &TempFile) {
+    //todo ungly file.path().unwrap()
+    let mut reader = csv::Reader::from_path(file.path().unwrap()).unwrap();
+
+    for result in reader.deserialize() {
+        let record: TastyworksRecord = result.unwrap();
+        println!("{:?}", record);
+    }
 }
 
 //todo nice error handling
