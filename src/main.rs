@@ -27,11 +27,10 @@ pub struct FileUploadForm<'f> {
 //merge uploaded data in excel
 //save and close session
 #[post("/upload", data = "<form>")]
-pub fn upload(form: Form<FileUploadForm<'_>>) -> Redirect {
+pub async fn upload(form: Form<FileUploadForm<'_>>) -> Redirect {
     match form.file.path() {
         Some(path) => {
-            ensure_drive_dirs_exist();
-            upload_to_drive(&form.file);
+            microsoft::upload_to_raw(path).await;
             todo(&form.file);
         }
         None => ()
@@ -39,11 +38,6 @@ pub fn upload(form: Form<FileUploadForm<'_>>) -> Redirect {
 
     Redirect::to(uri!("/"))
 }
-
-fn ensure_drive_dirs_exist() {}
-
-//todo impl
-fn upload_to_drive(file: &TempFile) {}
 
 //todo impl
 fn todo(file: &TempFile) {

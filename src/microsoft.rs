@@ -1,7 +1,9 @@
 use std::collections::HashMap;
+use std::fs;
+use std::path::Path;
 
-use redis::{Commands, Connection};
-use reqwest::Url;
+use redis::Commands;
+use reqwest::{StatusCode, Url};
 use rocket::response::Redirect;
 use serde::Deserialize;
 
@@ -70,6 +72,69 @@ pub async fn test() {
         .unwrap();
 
     println!("{}", text);
+}
+
+//todo fix bad error handling in this file
+//todo do sha1
+pub async fn file_exists(name: String, sha1: String) -> bool {
+    let client = reqwest::Client::new();
+    let response = client.get("https://graph.microsoft.com/v1.0/me/drive/root:/org/raw")
+        .bearer_auth(redis_data::access_token())
+        .send()
+        .await
+        .unwrap();
+
+    let code = response.status();
+
+    if code == StatusCode::NOT_FOUND {
+        return false;
+    }
+
+    true
+}
+
+pub async fn upload_to_raw(path: &Path) {
+    try_upload_to_raw(path).await;
+}
+
+async fn try_upload_to_raw(path: &Path) {
+    let file = fs::read(&path).unwrap();
+    let file_path = fs::canonicalize(&path).unwrap();
+
+    let client = reqwest::Client::new();
+
+    let uri = format!("https://graph.microsoft.com/v1.0/me/drive/root:/org/raw/{}:/content", file_path
+        .file_name()
+        .unwrap()
+        .to_str()
+        .unwrap());
+
+    let uri = format!("https://graph.microsoft.com/v1.0/me/drive/root:/org/raw/{}:/content", "test.txt");
+
+    println!("{}", uri);
+
+    let response = client.put(uri)
+        .header("Content-Type", "text/plain")
+        .body(file)
+        .bearer_auth(redis_data::access_token())
+        .send()
+        .await
+        .unwrap();
+
+    let text = response.text()
+        .await
+        .unwrap();
+
+    println!("{}", text);
+}
+
+async fn ensure_raw_dir_exists() {
+    let client = reqwest::Client::new();
+    // let response = client.get("https://graph.microsoft.com/v1.0/me/drive/root:/org/raw")
+    //     .bearer_auth(redis_data::access_token())
+    //     .send()
+    //     .await
+    //     .unwrap();
 }
 
 #[derive(Debug, Deserialize)]
