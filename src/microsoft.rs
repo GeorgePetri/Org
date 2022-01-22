@@ -12,8 +12,8 @@ use crate::{redis_data, secrets};
 //todo add state
 #[post("/login-microsoft")]
 pub fn login() -> Redirect {
-    let mut uri = Url::parse("https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize")
-        .unwrap();
+    let mut uri =
+        Url::parse("https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize").unwrap();
 
     uri.query_pairs_mut()
         .append_pair("client_id", &secrets::client_id())
@@ -39,20 +39,19 @@ pub async fn login_callback(code: String) -> Redirect {
 
     //todo reuse client
     let client = reqwest::Client::new();
-    let response = client.post(uri)
-        .form(&params)
-        .send()
-        .await
-        .unwrap();
+    let response = client.post(uri).form(&params).send().await.unwrap();
 
-    let token: Token = response
-        .json()
-        .await
-        .unwrap();
+    let token: Token = response.json().await.unwrap();
 
     let mut redis_connection = redis_data::redis_connection();
 
-    let _: () = redis_connection.set_ex("access_token", token.access_token, token.expires_in as usize).unwrap();
+    let _: () = redis_connection
+        .set_ex(
+            "access_token",
+            token.access_token,
+            token.expires_in as usize,
+        )
+        .unwrap();
 
     Redirect::to("/")
 }
@@ -61,15 +60,14 @@ pub async fn login_callback(code: String) -> Redirect {
 pub async fn test() {
     let client = reqwest::Client::new();
 
-    let response = client.get("https://graph.microsoft.com/v1.0/me/drive/root/children")
+    let response = client
+        .get("https://graph.microsoft.com/v1.0/me/drive/root/children")
         .bearer_auth(redis_data::access_token())
         .send()
         .await
         .unwrap();
 
-    let text = response.text()
-        .await
-        .unwrap();
+    let text = response.text().await.unwrap();
 
     println!("{}", text);
 }
@@ -78,7 +76,8 @@ pub async fn test() {
 //todo do sha1
 pub async fn file_exists(name: String, sha1: String) -> bool {
     let client = reqwest::Client::new();
-    let response = client.get("https://graph.microsoft.com/v1.0/me/drive/root:/org/raw")
+    let response = client
+        .get("https://graph.microsoft.com/v1.0/me/drive/root:/org/raw")
         .bearer_auth(redis_data::access_token())
         .send()
         .await
@@ -103,17 +102,20 @@ async fn try_upload_to_raw(path: &Path) {
 
     let client = reqwest::Client::new();
 
-    let uri = format!("https://graph.microsoft.com/v1.0/me/drive/root:/org/raw/{}:/content", file_path
-        .file_name()
-        .unwrap()
-        .to_str()
-        .unwrap());
+    let uri = format!(
+        "https://graph.microsoft.com/v1.0/me/drive/root:/org/raw/{}:/content",
+        file_path.file_name().unwrap().to_str().unwrap()
+    );
 
-    let uri = format!("https://graph.microsoft.com/v1.0/me/drive/root:/org/raw/{}:/content", "test.txt");
+    let uri = format!(
+        "https://graph.microsoft.com/v1.0/me/drive/root:/org/raw/{}:/content",
+        "test.txt"
+    );
 
     println!("{}", uri);
 
-    let response = client.put(uri)
+    let response = client
+        .put(uri)
         .header("Content-Type", "text/plain")
         .body(file)
         .bearer_auth(redis_data::access_token())
@@ -121,9 +123,7 @@ async fn try_upload_to_raw(path: &Path) {
         .await
         .unwrap();
 
-    let text = response.text()
-        .await
-        .unwrap();
+    let text = response.text().await.unwrap();
 
     println!("{}", text);
 }
@@ -145,4 +145,3 @@ struct Token {
     access_token: String,
     refresh_token: String,
 }
-
