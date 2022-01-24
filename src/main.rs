@@ -10,9 +10,12 @@ use rocket::http::ContentType;
 use rocket::response::Redirect;
 use serde::Deserialize;
 
+use crate::error::OrgError;
+
+mod error;
 mod microsoft;
-mod secrets;
 mod redis_data;
+mod secrets;
 
 #[derive(FromForm)]
 pub struct FileUploadForm<'f> {
@@ -27,16 +30,13 @@ pub struct FileUploadForm<'f> {
 //merge uploaded data in excel
 //save and close session
 #[post("/upload", data = "<form>")]
-pub async fn upload(form: Form<FileUploadForm<'_>>) -> Redirect {
-    match form.file.path() {
-        Some(path) => {
-            microsoft::upload_to_source(path).await;
-            todo(&form.file);
-        }
-        None => ()
-    };
+pub async fn upload(form: Form<FileUploadForm<'_>>) -> Result<Redirect, OrgError> {
+    let path = form.file.path().ok_or(OrgError::BadTempPath)?;
+    let name = form.file.name().ok_or(OrgError::MissingName)?;
 
-    Redirect::to(uri!("/"))
+    microsoft::upload_to_source(path, name).await?;
+
+    Ok(Redirect::to(uri!("/")))
 }
 
 //todo impl
@@ -50,20 +50,29 @@ fn todo(file: &TempFile) {
     }
 }
 
-//todo nice error handling
 //todo add tests
 #[launch]
 fn rocket() -> Rocket<Build> {
-    rocket::build()
-        .mount("/", routes![index, upload, microsoft::login, microsoft::login_callback, microsoft::test])
+    rocket::build().mount(
+        "/",
+        routes![
+            index,
+            upload,
+            microsoft::login,
+            microsoft::login_callback,
+            microsoft::test
+        ],
+    )
 }
 
 //todo add logout feature
-//todo how to format this nicely
 #[get("/")]
 async fn index() -> Option<NamedFile> {
-    let path = if redis_data::has_access_token()
-    { "static/index.html" } else { "static/login.html" };
+    let path = if redis_data::has_access_token() {
+        "static/index.html"
+    } else {
+        "static/login.html"
+    };
     NamedFile::open(Path::new(path)).await.ok()
 }
 

@@ -7,7 +7,7 @@ use reqwest::{StatusCode, Url};
 use rocket::response::Redirect;
 use serde::Deserialize;
 
-use crate::{redis_data, secrets};
+use crate::{OrgError, redis_data, secrets};
 
 //todo add state
 #[post("/login-microsoft")]
@@ -92,8 +92,10 @@ pub async fn file_exists(name: String, sha1: String) -> bool {
     true
 }
 
-pub async fn upload_to_source(path: &Path) {
+pub async fn upload_to_source(path: &Path, name: &str) -> Result<(), OrgError> {
     try_upload_to_source(path).await;
+
+    Ok(())
 }
 
 async fn try_upload_to_source(path: &Path) {
