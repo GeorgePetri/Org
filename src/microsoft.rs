@@ -77,7 +77,7 @@ pub async fn test() {
 pub async fn file_exists(name: String, sha1: String) -> bool {
     let client = reqwest::Client::new();
     let response = client
-        .get("https://graph.microsoft.com/v1.0/me/drive/root:/org/raw")
+        .get("https://graph.microsoft.com/v1.0/me/drive/root:/org/source")
         .bearer_auth(redis_data::access_token())
         .send()
         .await
@@ -92,23 +92,23 @@ pub async fn file_exists(name: String, sha1: String) -> bool {
     true
 }
 
-pub async fn upload_to_raw(path: &Path) {
-    try_upload_to_raw(path).await;
+pub async fn upload_to_source(path: &Path) {
+    try_upload_to_source(path).await;
 }
 
-async fn try_upload_to_raw(path: &Path) {
+async fn try_upload_to_source(path: &Path) {
     let file = fs::read(&path).unwrap();
     let file_path = fs::canonicalize(&path).unwrap();
 
     let client = reqwest::Client::new();
 
     let uri = format!(
-        "https://graph.microsoft.com/v1.0/me/drive/root:/org/raw/{}:/content",
+        "https://graph.microsoft.com/v1.0/me/drive/root:/org/source/{}:/content",
         file_path.file_name().unwrap().to_str().unwrap()
     );
 
     let uri = format!(
-        "https://graph.microsoft.com/v1.0/me/drive/root:/org/raw/{}:/content",
+        "https://graph.microsoft.com/v1.0/me/drive/root:/org/source/{}:/content",
         "test.txt"
     );
 
@@ -128,9 +128,9 @@ async fn try_upload_to_raw(path: &Path) {
     println!("{}", text);
 }
 
-async fn ensure_raw_dir_exists() {
+async fn ensure_source_dir_exists() {
     let client = reqwest::Client::new();
-    // let response = client.get("https://graph.microsoft.com/v1.0/me/drive/root:/org/raw")
+    // let response = client.get("https://graph.microsoft.com/v1.0/me/drive/root:/org/source")
     //     .bearer_auth(redis_data::access_token())
     //     .send()
     //     .await
