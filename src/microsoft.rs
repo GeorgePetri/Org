@@ -73,7 +73,7 @@ pub async fn test() {
 }
 
 //todo fix bad error handling in this file
-//todo do sha1
+//todo do sha256
 pub async fn file_exists(name: String, sha1: String) -> bool {
     let client = reqwest::Client::new();
     let response = client
@@ -92,51 +92,37 @@ pub async fn file_exists(name: String, sha1: String) -> bool {
     true
 }
 
+//todo check file exists first and don't compute anything if it does
 pub async fn upload_to_source(path: &Path, name: &str) -> Result<(), OrgError> {
-    try_upload_to_source(path).await;
+    try_upload_to_source(path, name).await?;
 
     Ok(())
 }
 
-async fn try_upload_to_source(path: &Path) {
-    let file = fs::read(&path).unwrap();
-    let file_path = fs::canonicalize(&path).unwrap();
+async fn try_upload_to_source(path: &Path, name: &str) -> Result<(), OrgError> {
+    let file = fs::read(&path)?;
+
+    let uri = format!(
+        "https://graph.microsoft.com/v1.0/me/drive/root:/org/source/{}:/content",
+        name
+    );
 
     let client = reqwest::Client::new();
-
-    let uri = format!(
-        "https://graph.microsoft.com/v1.0/me/drive/root:/org/source/{}:/content",
-        file_path.file_name().unwrap().to_str().unwrap()
-    );
-
-    let uri = format!(
-        "https://graph.microsoft.com/v1.0/me/drive/root:/org/source/{}:/content",
-        "test.txt"
-    );
-
-    println!("{}", uri);
-
     let response = client
         .put(uri)
+        .bearer_auth(redis_data::access_token())
         .header("Content-Type", "text/plain")
         .body(file)
-        .bearer_auth(redis_data::access_token())
         .send()
-        .await
-        .unwrap();
+        .await?;
 
-    let text = response.text().await.unwrap();
+    let code = response.status();
 
-    println!("{}", text);
-}
-
-async fn ensure_source_dir_exists() {
-    let client = reqwest::Client::new();
-    // let response = client.get("https://graph.microsoft.com/v1.0/me/drive/root:/org/source")
-    //     .bearer_auth(redis_data::access_token())
-    //     .send()
-    //     .await
-    //     .unwrap();
+    //todo should probably pass along status code
+    match code {
+        StatusCode::CREATED => Ok(()),
+        _ => Err(OrgError::MicrosoftDrive(String::from("Failed uploading to drive"))),
+    }
 }
 
 #[derive(Debug, Deserialize)]
