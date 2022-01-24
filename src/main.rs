@@ -24,7 +24,6 @@ pub struct FileUploadForm<'f> {
 }
 
 //use a persistent session for manipulating the excel
-//try setup a dir in drive for org files
 //create the excel there, if not existing
 //create a worksheet if not existing
 //merge uploaded data in excel
@@ -34,7 +33,12 @@ pub async fn upload(form: Form<FileUploadForm<'_>>) -> Result<Redirect, OrgError
     let path = form.file.path().ok_or(OrgError::BadTempPath)?;
     let name = form.file.name().ok_or(OrgError::MissingName)?;
 
-    microsoft::upload_to_source(path, name).await?;
+    //todo use proper hash value
+    let already_exists = microsoft::file_exists(name, "".to_string()).await?;
+
+    if already_exists {
+        microsoft::upload_to_source(path, name).await?;
+    }
 
     Ok(Redirect::to(uri!("/")))
 }

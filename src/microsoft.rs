@@ -72,24 +72,23 @@ pub async fn test() {
     println!("{}", text);
 }
 
-//todo fix bad error handling in this file
-//todo do sha256
-pub async fn file_exists(name: String, sha1: String) -> bool {
+//todo fix bad error handling in this func
+//todo impl hash, use name
+pub async fn file_exists(name: &str, sha256: String) -> Result<bool, OrgError> {
     let client = reqwest::Client::new();
     let response = client
         .get("https://graph.microsoft.com/v1.0/me/drive/root:/org/source")
         .bearer_auth(redis_data::access_token())
         .send()
-        .await
-        .unwrap();
+        .await?;
 
     let code = response.status();
 
     if code == StatusCode::NOT_FOUND {
-        return false;
+        return Ok(false);
     }
 
-    true
+    Ok(true)
 }
 
 //todo check file exists first and don't compute anything if it does
