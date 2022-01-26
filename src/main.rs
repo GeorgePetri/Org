@@ -16,6 +16,7 @@ mod error;
 mod microsoft;
 mod redis_data;
 mod secrets;
+mod hash;
 
 #[derive(FromForm)]
 pub struct FileUploadForm<'f> {

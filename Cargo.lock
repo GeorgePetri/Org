@@ -785,6 +785,7 @@ dependencies = [
  "csv",
  "redis",
  "reqwest",
+ "ring",
  "rocket",
  "serde",
 ]
