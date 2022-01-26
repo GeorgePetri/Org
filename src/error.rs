@@ -47,6 +47,7 @@ impl From<reqwest::Error> for OrgError {
 //todo log here
 impl<'r, 'o: 'r> Responder<'r, 'o> for OrgError {
     fn respond_to(self, request: &'r Request<'_>) -> rocket::response::Result<'o> {
+        println!("Error: {}", self.to_string());
         Status::InternalServerError.respond_to(request)
     }
 }

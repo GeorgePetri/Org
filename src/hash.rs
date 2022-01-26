@@ -3,7 +3,7 @@ use std::io::Read;
 
 use ring::digest::{Context, Digest, SHA256};
 
-fn sha256_digest<R: Read>(mut reader: R) -> Result<Digest, io::Error> {
+pub fn sha256_digest<R: Read>(mut reader: R) -> Result<Digest, io::Error> {
     let mut context = Context::new(&SHA256);
     let mut buffer = [0; 1024];
 
@@ -16,4 +16,12 @@ fn sha256_digest<R: Read>(mut reader: R) -> Result<Digest, io::Error> {
     }
 
     Ok(context.finish())
+}
+
+pub fn digest_to_upper_hex(digest: Digest) -> String {
+    digest
+        .as_ref()
+        .iter()
+        .map(|e| format!("{:X}", e))
+        .fold(String::new(), |string, current| string + &current)
 }

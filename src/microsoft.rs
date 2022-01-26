@@ -117,10 +117,14 @@ async fn try_upload_to_source(path: &Path, name: &str) -> Result<(), OrgError> {
 
     let code = response.status();
 
-    //todo should probably pass along status code
     match code {
+        StatusCode::OK => Ok(()),
         StatusCode::CREATED => Ok(()),
-        _ => Err(OrgError::MicrosoftDrive(String::from("Failed uploading to drive"))),
+        _ => Err(OrgError::MicrosoftDrive(format!(
+            "Failed uploading to drive code:{} text:{}",
+            code,
+            response.text().await?
+        ))),
     }
 }
 
