@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 use std::fs;
+use std::fs::File;
+use std::io::BufReader;
 use std::path::Path;
 
 use redis::Commands;
@@ -7,7 +9,7 @@ use reqwest::{StatusCode, Url};
 use rocket::response::Redirect;
 use serde::Deserialize;
 
-use crate::{OrgError, redis_data, secrets};
+use crate::{hash, OrgError, redis_data, secrets};
 
 //todo add state
 #[post("/login-microsoft")]
@@ -72,12 +74,15 @@ pub async fn test() {
     println!("{}", text);
 }
 
-//todo fix bad error handling in this func
-//todo impl hash, use name
-pub async fn file_exists(name: &str, sha256: String) -> Result<bool, OrgError> {
+pub async fn file_exists(path: &Path, name: &str) -> Result<bool, OrgError> {
     let client = reqwest::Client::new();
+
+    let uri = format!(
+        "https://graph.microsoft.com/v1.0/me/drive/root:/org/source/{}",
+        name
+    );
     let response = client
-        .get("https://graph.microsoft.com/v1.0/me/drive/root:/org/source")
+        .get(uri)
         .bearer_auth(redis_data::access_token())
         .send()
         .await?;
@@ -85,6 +90,18 @@ pub async fn file_exists(name: &str, sha256: String) -> Result<bool, OrgError> {
     let code = response.status();
 
     if code == StatusCode::NOT_FOUND {
+        return Ok(false);
+    }
+
+    let drive_item: DriveItem = response.json().await?;
+    let drive_hash = drive_item.file.hashes.sha256_hash;
+
+    let file = File::open(path)?;
+    let reader = BufReader::new(file);
+    let digest = hash::sha256_digest(reader)?;
+    let file_hash = hash::digest_to_upper_hex(digest);
+
+    if drive_hash != file_hash {
         return Ok(false);
     }
 
@@ -135,4 +152,20 @@ struct Token {
     expires_in: i32,
     access_token: String,
     refresh_token: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct DriveItem {
+    file: DriveItemFile,
+}
+
+#[derive(Debug, Deserialize)]
+struct DriveItemFile {
+    hashes: DriveItemHashes,
+}
+
+#[derive(Debug, Deserialize)]
+struct DriveItemHashes {
+    #[serde(rename = "sha256Hash")]
+    sha256_hash: String,
 }

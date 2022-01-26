@@ -18,10 +18,12 @@ pub fn sha256_digest<R: Read>(mut reader: R) -> Result<Digest, io::Error> {
     Ok(context.finish())
 }
 
+
+//todo add tests for this
 pub fn digest_to_upper_hex(digest: Digest) -> String {
     digest
         .as_ref()
         .iter()
-        .map(|e| format!("{:X}", e))
+        .map(|e| format!("{:02X}", e))
         .fold(String::new(), |string, current| string + &current)
 }

@@ -29,15 +29,15 @@ pub struct FileUploadForm<'f> {
 //create a worksheet if not existing
 //merge uploaded data in excel
 //save and close session
+//todo extension seems to be missing
 #[post("/upload", data = "<form>")]
 pub async fn upload(form: Form<FileUploadForm<'_>>) -> Result<Redirect, OrgError> {
     let path = form.file.path().ok_or(OrgError::BadTempPath)?;
     let name = form.file.name().ok_or(OrgError::MissingName)?;
 
-    //todo use proper hash value
-    let already_exists = microsoft::file_exists(name, "".to_string()).await?;
+    let already_exists = microsoft::file_exists(path, name).await?;
 
-    if already_exists {
+    if !already_exists {
         microsoft::upload_to_source(path, name).await?;
     }
 
