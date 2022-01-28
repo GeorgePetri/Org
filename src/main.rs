@@ -13,10 +13,10 @@ use serde::Deserialize;
 use crate::error::OrgError;
 
 mod error;
+mod hash;
 mod microsoft;
 mod redis_data;
 mod secrets;
-mod hash;
 
 #[derive(FromForm)]
 pub struct FileUploadForm<'f> {
@@ -29,16 +29,23 @@ pub struct FileUploadForm<'f> {
 //create a worksheet if not existing
 //merge uploaded data in excel
 //save and close session
-//todo extension seems to be missing
 #[post("/upload", data = "<form>")]
 pub async fn upload(form: Form<FileUploadForm<'_>>) -> Result<Redirect, OrgError> {
     let path = form.file.path().ok_or(OrgError::BadTempPath)?;
-    let name = form.file.name().ok_or(OrgError::MissingName)?;
+    let name_without_extension = form.file.name().ok_or(OrgError::MissingName)?;
+    let extension = form
+        .file
+        .content_type()
+        .ok_or(OrgError::BadTempPath)?
+        .extension()
+        .ok_or(OrgError::BadTempPath)?
+        .as_str();
+    let name = format!("{}.{}", name_without_extension, extension);
 
-    let already_exists = microsoft::file_exists(path, name).await?;
+    let already_exists = microsoft::file_exists(path, &name).await?;
 
     if !already_exists {
-        microsoft::upload_to_source(path, name).await?;
+        microsoft::upload_to_source(path, &name).await?;
     }
 
     Ok(Redirect::to(uri!("/")))
