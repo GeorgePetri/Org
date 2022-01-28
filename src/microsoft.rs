@@ -108,14 +108,7 @@ pub async fn file_exists(path: &Path, name: &str) -> Result<bool, OrgError> {
     Ok(true)
 }
 
-//todo check file exists first and don't compute anything if it does
 pub async fn upload_to_source(path: &Path, name: &str) -> Result<(), OrgError> {
-    try_upload_to_source(path, name).await?;
-
-    Ok(())
-}
-
-async fn try_upload_to_source(path: &Path, name: &str) -> Result<(), OrgError> {
     let file = fs::read(&path)?;
 
     let uri = format!(
