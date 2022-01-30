@@ -1,3 +1,4 @@
+use std::fs;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
@@ -66,3 +67,34 @@ pub async fn file_exists(path: &Path, name: &str) -> Result<bool, OrgError> {
 
     Ok(true)
 }
+
+pub async fn upload_to_source(path: &Path, name: &str) -> Result<(), OrgError> {
+    let file = fs::read(&path)?;
+
+    let uri = format!(
+        "https://graph.microsoft.com/v1.0/me/drive/root:/org/source/{}:/content",
+        name
+    );
+
+    let client = reqwest::Client::new();
+    let response = client
+        .put(uri)
+        .bearer_auth(redis_data::access_token())
+        .header("Content-Type", "text/plain")
+        .body(file)
+        .send()
+        .await?;
+
+    let code = response.status();
+
+    match code {
+        StatusCode::OK => Ok(()),
+        StatusCode::CREATED => Ok(()),
+        _ => Err(OrgError::MicrosoftDrive(format!(
+            "Failed uploading to drive code:{} text:{}",
+            code,
+            response.text().await?
+        ))),
+    }
+}
+

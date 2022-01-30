@@ -1,15 +1,14 @@
 use std::collections::HashMap;
-use std::fs;
-use std::path::Path;
 
 use redis::Commands;
-use reqwest::{StatusCode, Url};
+use reqwest::Url;
 use rocket::response::Redirect;
 use serde::Deserialize;
 
-use crate::{OrgError, redis_data, secrets};
+use crate::{redis_data, secrets};
 
 pub use self::graph_client::file_exists;
+pub use self::graph_client::upload_to_source;
 
 pub mod data;
 mod graph_client;
@@ -59,36 +58,6 @@ pub async fn login_callback(code: String) -> Redirect {
         .unwrap();
 
     Redirect::to("/")
-}
-
-pub async fn upload_to_source(path: &Path, name: &str) -> Result<(), OrgError> {
-    let file = fs::read(&path)?;
-
-    let uri = format!(
-        "https://graph.microsoft.com/v1.0/me/drive/root:/org/source/{}:/content",
-        name
-    );
-
-    let client = reqwest::Client::new();
-    let response = client
-        .put(uri)
-        .bearer_auth(redis_data::access_token())
-        .header("Content-Type", "text/plain")
-        .body(file)
-        .send()
-        .await?;
-
-    let code = response.status();
-
-    match code {
-        StatusCode::OK => Ok(()),
-        StatusCode::CREATED => Ok(()),
-        _ => Err(OrgError::MicrosoftDrive(format!(
-            "Failed uploading to drive code:{} text:{}",
-            code,
-            response.text().await?
-        ))),
-    }
 }
 
 #[derive(Debug, Deserialize)]
