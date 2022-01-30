@@ -71,8 +71,7 @@ fn rocket() -> Rocket<Build> {
             index,
             upload,
             microsoft::login,
-            microsoft::login_callback,
-            microsoft::test
+            microsoft::login_callback
         ],
     )
 }
