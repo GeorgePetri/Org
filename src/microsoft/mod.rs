@@ -7,8 +7,7 @@ use serde::Deserialize;
 
 use crate::{redis_data, secrets};
 
-pub use self::graph_client::file_exists;
-pub use self::graph_client::upload_to_source;
+pub use self::graph_client::{file_exists, upload_to_source};
 
 pub mod data;
 mod graph_client;
