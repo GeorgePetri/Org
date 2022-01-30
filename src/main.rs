@@ -44,6 +44,9 @@ pub async fn upload(form: Form<FileUploadForm<'_>>) -> Result<Redirect, OrgError
 
     let already_exists = microsoft::file_exists(path, &name).await?;
 
+    //todo move this
+    microsoft::create_session().await?;
+
     if !already_exists {
         microsoft::upload_to_source(path, &name).await?;
     }

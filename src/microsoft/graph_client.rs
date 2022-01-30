@@ -1,9 +1,11 @@
+use std::collections::HashMap;
 use std::fs;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
 
 use reqwest::StatusCode;
+use serde::Deserialize;
 
 use crate::{hash, OrgError, redis_data};
 use crate::microsoft::data::DriveItem;
@@ -98,3 +100,37 @@ pub async fn upload_to_source(path: &Path, name: &str) -> Result<(), OrgError> {
     }
 }
 
+//i think it should be &str instead
+pub async fn create_session() -> Result<String, OrgError> {
+    let uri =
+        "https://graph.microsoft.com/v1.0/me/drive/root:/org/ledger.xlsx:/workbook/createSession";
+
+    let mut set = HashMap::new();
+    set.insert("persistChanges", true);
+
+    let client = reqwest::Client::new();
+    let response = client
+        .post(uri)
+        .bearer_auth(redis_data::access_token())
+        .json(&set)
+        .send()
+        .await?;
+
+    #[derive(Debug, Deserialize)]
+    struct Response {
+        id: String,
+    }
+
+    println!("status = {}", response.status());
+
+    let json: Response = response.json().await?;
+    println!("json = {:?}", json);
+    println!("json = {}", json.id);
+    //
+    Ok(json.id)
+}
+
+//todo impl
+pub async fn close_session(session: &str) -> Result<(), OrgError> {
+    Ok(())
+}
