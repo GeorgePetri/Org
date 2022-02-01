@@ -15,6 +15,8 @@ use crate::microsoft::data::DriveItem;
 pub async fn create_ledger() -> Result<(), OrgError> {
     let uri = "https://graph.microsoft.com/v1.0/me/drive/root:/org/ledger.xlsx:/content";
 
+    //todo need to upload a proper file to work
+    //copy a known good excel file and upload that instead of 0 bytes
     let client = reqwest::Client::new();
     let response = client
         .put(uri)
