@@ -115,9 +115,12 @@ pub async fn create_session() -> Result<String, OrgError> {
         .send()
         .await?;
 
-    //todo fix copy paste
     if !response.status().is_success() {
-        return Err(OrgError::MicrosoftDrive(response.text().await?))
+        let error = match response.status() {
+            StatusCode::NOT_FOUND => OrgError::MicrosoftDrive404,
+            _ => OrgError::MicrosoftDrive(response.text().await?),
+        };
+        return Err(error);
     }
 
     #[derive(Debug, Deserialize)]
@@ -145,7 +148,7 @@ pub async fn close_session(session: &str) -> Result<(), OrgError> {
 
     //todo fix copy paste
     if !response.status().is_success() {
-        return Err(OrgError::MicrosoftDrive(response.text().await?))
+        return Err(OrgError::MicrosoftDrive(response.text().await?));
     }
 
     Ok(())

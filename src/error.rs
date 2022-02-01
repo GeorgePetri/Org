@@ -12,7 +12,8 @@ pub enum OrgError {
     MissingName,
     Io(io::Error),
     Reqwest(reqwest::Error),
-    //todo is this right string?
+    //todo create enum for drive errors
+    MicrosoftDrive404,
     MicrosoftDrive(String),
 }
 
@@ -23,6 +24,7 @@ impl Display for OrgError {
             OrgError::MissingName => write!(f, "Invalid name"),
             OrgError::Io(error) => write!(f, "IO error: {}", error),
             OrgError::Reqwest(error) => write!(f, "IO error: {}", error),
+            OrgError::MicrosoftDrive404 => write!(f, "Microsoft Drive error 404"),
             OrgError::MicrosoftDrive(error_text) => {
                 write!(f, "Microsoft Drive error: {}", error_text)
             }

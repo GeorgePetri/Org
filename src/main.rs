@@ -44,13 +44,25 @@ pub async fn upload(form: Form<FileUploadForm<'_>>) -> Result<Redirect, OrgError
 
     let already_exists = microsoft::file_exists(path, &name).await?;
 
-    //todo move this
-    let session = microsoft::create_session().await?;
-    microsoft::close_session(&session).await?;
+    //todo uncomment this
+    // if !already_exists {
+    microsoft::upload_to_source(path, &name).await?;
 
-    if !already_exists {
-        microsoft::upload_to_source(path, &name).await?;
-    }
+    let session = microsoft::create_session().await;
+
+    let session = match session {
+        Ok(result) => result,
+        Err(error) => match error {
+            OrgError::MicrosoftDrive404 => {
+                println!("404 err");
+                "a".to_string()
+            }
+            _ => return Err(error),
+        },
+    };
+
+    // microsoft::close_session(&session).await?;
+    // }
 
     Ok(Redirect::to(uri!("/")))
 }
@@ -71,12 +83,7 @@ fn todo(file: &TempFile) {
 fn rocket() -> Rocket<Build> {
     rocket::build().mount(
         "/",
-        routes![
-            index,
-            upload,
-            microsoft::login,
-            microsoft::login_callback
-        ],
+        routes![index, upload, microsoft::login, microsoft::login_callback],
     )
 }
 
