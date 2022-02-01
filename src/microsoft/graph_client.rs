@@ -12,7 +12,6 @@ use crate::microsoft::data::DriveItem;
 
 //todo cache client
 
-//todo impl properly
 pub async fn create_ledger() -> Result<(), OrgError> {
     let uri = "https://graph.microsoft.com/v1.0/me/drive/root:/org/ledger.xlsx:/content";
 
@@ -28,10 +27,10 @@ pub async fn create_ledger() -> Result<(), OrgError> {
         .send()
         .await?;
 
-    let code = response.status();
-
-    println!("code {}", response.status());
-    println!("text {}", response.text().await?);
+    //todo fix copy paste
+    if !response.status().is_success() {
+        return Err(OrgError::MicrosoftDrive(response.text().await?));
+    }
 
     Ok(())
 }
@@ -132,7 +131,6 @@ pub async fn create_session() -> Result<String, OrgError> {
     Ok(json.id)
 }
 
-//todo impl
 pub async fn close_session(session: &str) -> Result<(), OrgError> {
     let uri =
         "https://graph.microsoft.com/v1.0/me/drive/root:/org/ledger.xlsx:/workbook/closeSession";

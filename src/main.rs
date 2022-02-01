@@ -54,14 +54,15 @@ pub async fn upload(form: Form<FileUploadForm<'_>>) -> Result<Redirect, OrgError
         Ok(result) => result,
         Err(error) => match error {
             OrgError::MicrosoftDrive404 => {
-                println!("404 err");
-                "a".to_string()
+                microsoft::create_ledger().await?;
+                microsoft::create_session().await?
             }
             _ => return Err(error),
         },
     };
 
-    // microsoft::close_session(&session).await?;
+    println!("closing session");
+    microsoft::close_session(&session).await?;
     // }
 
     Ok(Redirect::to(uri!("/")))
