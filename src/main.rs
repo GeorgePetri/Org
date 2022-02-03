@@ -62,11 +62,19 @@ pub async fn upload(form: Form<FileUploadForm<'_>>) -> Result<Redirect, OrgError
         },
     };
 
-    println!("closing session");
+    upload_new_data(&session).await?;
     microsoft::close_session(&session).await?;
     // }
 
     Ok(Redirect::to(uri!("/")))
+}
+
+//todo impl
+fn read_current_data(session: &String) {}
+
+//todo does table need to auto grow?
+async fn upload_new_data(session: &String) -> Result<(), OrgError> {
+    Ok(())
 }
 
 //todo impl
