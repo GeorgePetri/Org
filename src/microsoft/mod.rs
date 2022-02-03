@@ -5,7 +5,7 @@ use reqwest::Url;
 use rocket::response::Redirect;
 use serde::Deserialize;
 
-use crate::{redis_data, secrets};
+use crate::{OrgError, redis_data, secrets};
 
 //todo clean this
 pub use self::graph_client::{
@@ -62,6 +62,12 @@ pub async fn login_callback(code: String) -> Redirect {
     Redirect::to("/")
 }
 
+//todo impl
+//todo is this the correct type, or should array be used instead?
+pub async fn upload_records(records: &Vec<Record>) -> Result<(), OrgError> {
+    Ok(())
+}
+
 #[derive(Debug, Deserialize)]
 struct Token {
     token_type: String,
@@ -71,17 +77,18 @@ struct Token {
     refresh_token: String,
 }
 
-struct Record {
-    date_time: String,
-    transaction_code: String,
-    transaction_subcode: String,
-    symbol: Option<String>,
-    buy_sell: Option<String>,
-    open_close: Option<String>,
-    quantity: i64,
-    price: Option<String>,
-    fees: String,
-    amount: String,
-    description: String,
-    account_reference: String,
+//todo move since this isn't msft specific
+pub struct Record {
+    pub date_time: String,
+    pub transaction_code: String,
+    pub transaction_subcode: String,
+    pub symbol: Option<String>,
+    pub buy_sell: Option<String>,
+    pub open_close: Option<String>,
+    pub quantity: i64,
+    pub price: Option<String>,
+    pub fees: String,
+    pub amount: String,
+    pub description: String,
+    pub account_reference: String,
 }

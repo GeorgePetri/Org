@@ -11,6 +11,7 @@ use rocket::response::Redirect;
 use serde::Deserialize;
 
 use crate::error::OrgError;
+use crate::microsoft::Record;
 
 mod error;
 mod hash;
@@ -140,4 +141,24 @@ struct TastyworksRecord {
     description: String,
     #[serde(rename = "Account Reference")]
     account_reference: String,
+}
+
+//todo this clones don't look good, should they change?
+impl TastyworksRecord {
+    fn to_record(&self) -> Record {
+        Record {
+            date_time: self.date_time.clone(),
+            transaction_code: self.transaction_code.clone(),
+            transaction_subcode: self.transaction_subcode.clone(),
+            symbol: self.symbol.clone(),
+            buy_sell: self.buy_sell.clone(),
+            open_close: self.open_close.clone(),
+            quantity: self.quantity,
+            price: self.price.clone(),
+            fees: self.fees.clone(),
+            amount: self.amount.clone(),
+            description: self.description.clone(),
+            account_reference: self.account_reference.clone(),
+        }
+    }
 }
