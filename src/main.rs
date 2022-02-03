@@ -55,6 +55,7 @@ pub async fn upload(form: Form<FileUploadForm<'_>>) -> Result<Redirect, OrgError
         Err(error) => match error {
             OrgError::MicrosoftDrive404 => {
                 microsoft::create_ledger().await?;
+                //todo currently there is period of time between when the ledger is uploaded and a session can be crated this should be fixed in the future with an async flow
                 microsoft::create_session().await?
             }
             _ => return Err(error),
