@@ -70,3 +70,18 @@ struct Token {
     access_token: String,
     refresh_token: String,
 }
+
+struct Record {
+    date_time: String,
+    transaction_code: String,
+    transaction_subcode: String,
+    symbol: Option<String>,
+    buy_sell: Option<String>,
+    open_close: Option<String>,
+    quantity: i64,
+    price: Option<String>,
+    fees: String,
+    amount: String,
+    description: String,
+    account_reference: String,
+}
