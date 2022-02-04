@@ -62,9 +62,54 @@ pub async fn login_callback(code: String) -> Redirect {
     Redirect::to("/")
 }
 
-//todo impl
-//todo is this the correct type, or should array be used instead?
+//todo code looks bad
 pub async fn upload_records(session: &String, records: &Vec<Record>) -> Result<(), OrgError> {
+    fn format_str(string: &String) -> String {
+        format!("\"{}\"", string)
+    }
+    fn format_option(option: &Option<String>) -> String {
+        match option {
+            None => "null".to_string(),
+            Some(value) => format_str(value)
+        }
+    }
+
+    let mut values = "[".to_string();
+    for record in records.iter() {
+        let mut string = "[".to_string();
+        string.push_str(format_str(&record.date_time).as_str());
+        string.push_str(", ");
+        string.push_str(format_str(&record.transaction_code).as_str());
+        string.push_str(", ");
+        string.push_str(format_str(&record.transaction_subcode).as_str());
+        string.push_str(", ");
+        string.push_str(format_option(&record.symbol).as_str());
+        string.push_str(", ");
+        string.push_str(format_option(&record.buy_sell).as_str());
+        string.push_str(", ");
+        string.push_str(format_option(&record.open_close).as_str());
+        string.push_str(", ");
+        string.push_str(record.quantity.to_string().as_str());
+        string.push_str(", ");
+        string.push_str(format_option(&record.price).as_str());
+        string.push_str(", ");
+        string.push_str(format_str(&record.fees).as_str());
+        string.push_str(", ");
+        string.push_str(format_str(&record.amount).as_str());
+        string.push_str(", ");
+        string.push_str(format_str(&record.description).as_str());
+        string.push_str(", ");
+        string.push_str(format_str(&record.account_reference).as_str());
+        string.push_str("]");
+
+        values.push_str(&string);
+        values.push_str(", ");
+    }
+    values.truncate(values.len() - 2);
+    values.push_str("]");
+
+    graph_client::create_row(session, &values).await?;
+
     Ok(())
 }
 
@@ -78,6 +123,7 @@ struct Token {
 }
 
 //todo move since this isn't msft specific
+//todo should these fields be &str?
 pub struct Record {
     pub date_time: String,
     pub transaction_code: String,
