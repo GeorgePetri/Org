@@ -63,6 +63,7 @@ pub async fn login_callback(code: String) -> Redirect {
 }
 
 //todo code looks bad
+//todo try using a serializer
 pub async fn upload_records(session: &String, records: &Vec<Record>) -> Result<(), OrgError> {
     fn format_str(string: &String) -> String {
         format!("\"{}\"", string)
@@ -70,11 +71,11 @@ pub async fn upload_records(session: &String, records: &Vec<Record>) -> Result<(
     fn format_option(option: &Option<String>) -> String {
         match option {
             None => "null".to_string(),
-            Some(value) => format_str(value)
+            Some(value) => format_str(value),
         }
     }
 
-    let mut values = "[".to_string();
+    let mut values = "{\"values\": [".to_string();
     for record in records.iter() {
         let mut string = "[".to_string();
         string.push_str(format_str(&record.date_time).as_str());
@@ -106,9 +107,9 @@ pub async fn upload_records(session: &String, records: &Vec<Record>) -> Result<(
         values.push_str(", ");
     }
     values.truncate(values.len() - 2);
-    values.push_str("]");
+    values.push_str("]}");
 
-    graph_client::create_row(session, &values).await?;
+    graph_client::create_row(session, values).await?;
 
     Ok(())
 }

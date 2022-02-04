@@ -105,6 +105,7 @@ pub async fn create_session() -> Result<String, OrgError> {
     let uri =
         "https://graph.microsoft.com/v1.0/me/drive/root:/org/ledger.xlsx:/workbook/createSession";
 
+    //todo try replace map with a type
     let mut body = HashMap::new();
     body.insert("persistChanges", true);
 
@@ -154,19 +155,17 @@ pub async fn close_session(session: &str) -> Result<(), OrgError> {
     Ok(())
 }
 
-pub async fn create_row(session: &str, values: &str) -> Result<(), OrgError> {
+pub async fn create_row(session: &str, body: String) -> Result<(), OrgError> {
     let uri =
         "https://graph.microsoft.com/v1.0/me/drive/root:/org/ledger.xlsx:/workbook/tables/Table1/rows";
-
-    let mut body = HashMap::new();
-    body.insert("values", values);
 
     let client = reqwest::Client::new();
     let response = client
         .post(uri)
         .bearer_auth(redis_data::access_token())
         .header("workbook-session-id", session)
-        .json(&body)
+        .header("Content-type", "application/json")
+        .body(body)
         .send()
         .await?;
 

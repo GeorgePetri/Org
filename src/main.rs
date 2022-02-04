@@ -6,7 +6,6 @@ use std::path::Path;
 use rocket::{Build, Rocket};
 use rocket::form::Form;
 use rocket::fs::{NamedFile, TempFile};
-use rocket::futures::TryFutureExt;
 use rocket::http::ContentType;
 use rocket::response::Redirect;
 use serde::Deserialize;
@@ -88,17 +87,6 @@ async fn upload_new_data(session: &String, path: &Path) -> Result<(), OrgError> 
     microsoft::upload_records(session, &records).await?;
 
     Ok(())
-}
-
-//todo impl
-fn todo(file: &TempFile) {
-    //todo ungly file.path().unwrap()
-    let mut reader = csv::Reader::from_path(file.path().unwrap()).unwrap();
-
-    for result in reader.deserialize() {
-        let record: TastyworksRecord = result.unwrap();
-        println!("{:?}", record);
-    }
 }
 
 //todo add tests
