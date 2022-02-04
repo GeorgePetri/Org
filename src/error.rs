@@ -15,6 +15,7 @@ pub enum OrgError {
     //todo create enum for drive errors
     MicrosoftDrive404,
     MicrosoftDrive(String),
+    Csv(csv::Error),
 }
 
 impl Display for OrgError {
@@ -23,11 +24,12 @@ impl Display for OrgError {
             OrgError::BadTempPath => write!(f, "File could not be found at the temp location"),
             OrgError::MissingName => write!(f, "Invalid name"),
             OrgError::Io(error) => write!(f, "IO error: {}", error),
-            OrgError::Reqwest(error) => write!(f, "IO error: {}", error),
+            OrgError::Reqwest(error) => write!(f, "Reqwest error: {}", error),
             OrgError::MicrosoftDrive404 => write!(f, "Microsoft Drive error 404"),
             OrgError::MicrosoftDrive(error_text) => {
                 write!(f, "Microsoft Drive error: {}", error_text)
             }
+            OrgError::Csv(error) => write!(f, "Csv error: {}", error),
         }
     }
 }
@@ -43,6 +45,12 @@ impl From<io::Error> for OrgError {
 impl From<reqwest::Error> for OrgError {
     fn from(error: reqwest::Error) -> Self {
         OrgError::Reqwest(error)
+    }
+}
+
+impl From<csv::Error> for OrgError {
+    fn from(error: csv::Error) -> Self {
+        OrgError::Csv(error)
     }
 }
 

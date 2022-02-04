@@ -64,7 +64,7 @@ pub async fn login_callback(code: String) -> Redirect {
 
 //todo impl
 //todo is this the correct type, or should array be used instead?
-pub async fn upload_records(records: &Vec<Record>) -> Result<(), OrgError> {
+pub async fn upload_records(session: &String, records: &Vec<Record>) -> Result<(), OrgError> {
     Ok(())
 }
 

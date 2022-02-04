@@ -6,6 +6,7 @@ use std::path::Path;
 use rocket::{Build, Rocket};
 use rocket::form::Form;
 use rocket::fs::{NamedFile, TempFile};
+use rocket::futures::TryFutureExt;
 use rocket::http::ContentType;
 use rocket::response::Redirect;
 use serde::Deserialize;
@@ -63,7 +64,7 @@ pub async fn upload(form: Form<FileUploadForm<'_>>) -> Result<Redirect, OrgError
         },
     };
 
-    upload_new_data(&session).await?;
+    upload_new_data(&session, path).await?;
     microsoft::close_session(&session).await?;
     // }
 
@@ -74,7 +75,17 @@ pub async fn upload(form: Form<FileUploadForm<'_>>) -> Result<Redirect, OrgError
 fn read_current_data(session: &String) {}
 
 //todo does table need to auto grow?
-async fn upload_new_data(session: &String) -> Result<(), OrgError> {
+async fn upload_new_data(session: &String, path: &Path) -> Result<(), OrgError> {
+    let mut reader = csv::Reader::from_path(path)?;
+
+    let mut records = Vec::new();
+    for result in reader.deserialize() {
+        let result: TastyworksRecord = result?;
+        records.push(result.to_record());
+    }
+
+    microsoft::upload_records(session, &records).await?;
+
     Ok(())
 }
 
