@@ -105,14 +105,14 @@ pub async fn create_session() -> Result<String, OrgError> {
     let uri =
         "https://graph.microsoft.com/v1.0/me/drive/root:/org/ledger.xlsx:/workbook/createSession";
 
-    let mut set = HashMap::new();
-    set.insert("persistChanges", true);
+    let mut body = HashMap::new();
+    body.insert("persistChanges", true);
 
     let client = reqwest::Client::new();
     let response = client
         .post(uri)
         .bearer_auth(redis_data::access_token())
-        .json(&set)
+        .json(&body)
         .send()
         .await?;
 
@@ -143,6 +143,30 @@ pub async fn close_session(session: &str) -> Result<(), OrgError> {
         .bearer_auth(redis_data::access_token())
         .header("workbook-session-id", session)
         .header("Content-Length", 0)
+        .send()
+        .await?;
+
+    //todo fix copy paste
+    if !response.status().is_success() {
+        return Err(OrgError::MicrosoftDrive(response.text().await?));
+    }
+
+    Ok(())
+}
+
+pub async fn create_row(session: &str, values: &str) -> Result<(), OrgError> {
+    let uri =
+        "https://graph.microsoft.com/v1.0/me/drive/root:/org/ledger.xlsx:/workbook/tables/Table1/rows";
+
+    let mut body = HashMap::new();
+    body.insert("values", values);
+
+    let client = reqwest::Client::new();
+    let response = client
+        .post(uri)
+        .bearer_auth(redis_data::access_token())
+        .header("workbook-session-id", session)
+        .json(&body)
         .send()
         .await?;
 

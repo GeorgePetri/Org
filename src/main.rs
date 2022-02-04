@@ -72,6 +72,7 @@ pub async fn upload(form: Form<FileUploadForm<'_>>) -> Result<Redirect, OrgError
 }
 
 //todo impl
+//todo create row can specify index, use it for merging data
 fn read_current_data(session: &String) {}
 
 //todo does table need to auto grow?
