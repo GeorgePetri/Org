@@ -2,7 +2,9 @@
 extern crate rocket;
 
 use std::path::Path;
+use std::string::ParseError;
 
+use chrono::{NaiveDate, NaiveDateTime, ParseResult};
 use rocket::{Build, Rocket};
 use rocket::form::Form;
 use rocket::fs::{NamedFile, TempFile};
@@ -70,7 +72,6 @@ pub async fn upload(form: Form<FileUploadForm<'_>>) -> Result<Redirect, OrgError
 
     Ok(Redirect::to(uri!("/")))
 }
-
 
 //todo does table need to auto grow?
 async fn upload_new_data(session: &str, path: &Path) -> Result<(), OrgError> {
@@ -142,10 +143,13 @@ struct TastyworksRecord {
 }
 
 //todo this clones don't look good, should they change?
+//todo timezone info
+//todo remove unwrap, use error
 impl TastyworksRecord {
     fn to_record(&self) -> Record {
+        let date_time = NaiveDateTime::parse_from_str(self.date_time.as_str(), "%m/%d/%Y %I:%M %p").unwrap();
         Record {
-            date_time: self.date_time.clone(),
+            date_time,
             transaction_code: self.transaction_code.clone(),
             transaction_subcode: self.transaction_subcode.clone(),
             symbol: self.symbol.clone(),

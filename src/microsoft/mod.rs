@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use chrono::{DateTime, NaiveDateTime, Utc};
 use redis::Commands;
 use reqwest::Url;
 use rocket::response::Redirect;
@@ -65,7 +66,6 @@ pub async fn login_callback(code: String) -> Redirect {
 //todo impl
 pub async fn get_records(session: &str) -> Result<(), OrgError> {
     let rows = graph_client::get_rows(session).await?;
-    println!("rows {:?}", rows);
 
     Ok(())
 }
@@ -86,7 +86,8 @@ pub async fn upload_records(session: &str, records: &Vec<Record>) -> Result<(), 
     let mut values = "{\"values\": [".to_string();
     for record in records.iter() {
         let mut string = "[".to_string();
-        string.push_str(format_str(&record.date_time).as_str());
+        //todo fix tostring here
+        string.push_str(format_str(&record.date_time.to_string()).as_str());
         string.push_str(", ");
         string.push_str(format_str(&record.transaction_code).as_str());
         string.push_str(", ");
@@ -134,7 +135,7 @@ struct Token {
 //todo move since this isn't msft specific
 //todo should these fields be &str?
 pub struct Record {
-    pub date_time: String,
+    pub date_time: NaiveDateTime,
     pub transaction_code: String,
     pub transaction_subcode: String,
     pub symbol: Option<String>,
