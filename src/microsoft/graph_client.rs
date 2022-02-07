@@ -6,6 +6,7 @@ use std::path::Path;
 
 use reqwest::StatusCode;
 use serde::Deserialize;
+use serde_json::Value;
 
 use crate::{hash, OrgError, redis_data};
 use crate::microsoft::data::DriveItem;
@@ -155,7 +156,7 @@ pub async fn close_session(session: &str) -> Result<(), OrgError> {
     Ok(())
 }
 
-pub async fn get_rows(session: &str) -> Result<(), OrgError> {
+pub async fn get_rows(session: &str) -> Result<Vec<Vec<Value>>, OrgError> {
     let uri =
         "https://graph.microsoft.com/v1.0/me/drive/root:/org/ledger.xlsx:/workbook/tables/Table1/rows";
 
@@ -174,19 +175,21 @@ pub async fn get_rows(session: &str) -> Result<(), OrgError> {
 
     #[derive(Debug, Deserialize)]
     struct Response {
-        value: Row,
+        value: Vec<Row>,
     }
 
     #[derive(Debug, Deserialize)]
     struct Row {
-        values: Vec<Vec<String>>,
+        values: Vec<Vec<Value>>,
     }
 
     let json: Response = response.json().await?;
 
-    println!("rows: {:?}", json);
-//todo return proper type
-    Ok(())
+    let result: Vec<Vec<Value>> = json.value.iter()
+        .map(|v| v.values[0].clone())
+        .collect();
+
+    Ok(result)
 }
 
 pub async fn create_rows(session: &str, body: String) -> Result<(), OrgError> {

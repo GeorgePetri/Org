@@ -64,7 +64,8 @@ pub async fn login_callback(code: String) -> Redirect {
 
 //todo impl
 pub async fn get_records(session: &str) -> Result<(), OrgError> {
-    graph_client::get_rows(session).await?;
+    let rows = graph_client::get_rows(session).await?;
+    println!("rows {:?}", rows);
 
     Ok(())
 }
