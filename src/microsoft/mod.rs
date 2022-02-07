@@ -62,9 +62,16 @@ pub async fn login_callback(code: String) -> Redirect {
     Redirect::to("/")
 }
 
+//todo impl
+pub async fn get_records(session: &str) -> Result<(), OrgError> {
+    graph_client::get_rows(session).await?;
+
+    Ok(())
+}
+
 //todo code looks bad
 //todo try using a serializer
-pub async fn upload_records(session: &String, records: &Vec<Record>) -> Result<(), OrgError> {
+pub async fn upload_records(session: &str, records: &Vec<Record>) -> Result<(), OrgError> {
     fn format_str(string: &String) -> String {
         format!("\"{}\"", string)
     }
@@ -109,7 +116,7 @@ pub async fn upload_records(session: &String, records: &Vec<Record>) -> Result<(
     values.truncate(values.len() - 2);
     values.push_str("]}");
 
-    graph_client::create_row(session, values).await?;
+    graph_client::create_rows(session, values).await?;
 
     Ok(())
 }

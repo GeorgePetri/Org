@@ -155,7 +155,41 @@ pub async fn close_session(session: &str) -> Result<(), OrgError> {
     Ok(())
 }
 
-pub async fn create_row(session: &str, body: String) -> Result<(), OrgError> {
+pub async fn get_rows(session: &str) -> Result<(), OrgError> {
+    let uri =
+        "https://graph.microsoft.com/v1.0/me/drive/root:/org/ledger.xlsx:/workbook/tables/Table1/rows";
+
+    let client = reqwest::Client::new();
+    let response = client
+        .get(uri)
+        .bearer_auth(redis_data::access_token())
+        .header("workbook-session-id", session)
+        .send()
+        .await?;
+
+    //todo fix copy paste
+    if !response.status().is_success() {
+        return Err(OrgError::MicrosoftDrive(response.text().await?));
+    }
+
+    #[derive(Debug, Deserialize)]
+    struct Response {
+        value: Row,
+    }
+
+    #[derive(Debug, Deserialize)]
+    struct Row {
+        values: Vec<Vec<String>>,
+    }
+
+    let json: Response = response.json().await?;
+
+    println!("rows: {:?}", json);
+//todo return proper type
+    Ok(())
+}
+
+pub async fn create_rows(session: &str, body: String) -> Result<(), OrgError> {
     let uri =
         "https://graph.microsoft.com/v1.0/me/drive/root:/org/ledger.xlsx:/workbook/tables/Table1/rows";
 

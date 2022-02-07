@@ -63,6 +63,7 @@ pub async fn upload(form: Form<FileUploadForm<'_>>) -> Result<Redirect, OrgError
         },
     };
 
+    microsoft::get_records(&session).await?;
     upload_new_data(&session, path).await?;
     microsoft::close_session(&session).await?;
     // }
@@ -70,12 +71,9 @@ pub async fn upload(form: Form<FileUploadForm<'_>>) -> Result<Redirect, OrgError
     Ok(Redirect::to(uri!("/")))
 }
 
-//todo impl
-//todo create row can specify index, use it for merging data
-fn read_current_data(session: &String) {}
 
 //todo does table need to auto grow?
-async fn upload_new_data(session: &String, path: &Path) -> Result<(), OrgError> {
+async fn upload_new_data(session: &str, path: &Path) -> Result<(), OrgError> {
     let mut reader = csv::Reader::from_path(path)?;
 
     let mut records = Vec::new();
