@@ -93,8 +93,19 @@ fn try_deserialize_record(row: &Vec<Value>) -> Result<Record, OrgError> {
     panic!()
 }
 
-//todo impl
+//todo write unit test
 fn is_empty_row(row: &Vec<Value>) -> bool {
+    for value in row {
+        match value {
+            Value::String(string) => {
+                if !string.is_empty() {
+                    return false;
+                }
+            }
+            _ => return false,
+        }
+    }
+
     true
 }
 
