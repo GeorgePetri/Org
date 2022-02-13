@@ -3,7 +3,7 @@ extern crate rocket;
 
 use std::path::Path;
 
-use chrono::{NaiveDateTime, ParseResult};
+use chrono::NaiveDateTime;
 use rocket::{Build, Rocket};
 use rocket::form::Form;
 use rocket::fs::{NamedFile, TempFile};

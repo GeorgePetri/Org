@@ -1,12 +1,13 @@
 use std::collections::HashMap;
-use std::vec;
+use std::option::Option;
 
-use chrono::NaiveDateTime;
+use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use redis::Commands;
 use reqwest::Url;
 use rocket::response::Redirect;
 use serde::Deserialize;
 use serde_json::Value;
+use Value::Number;
 
 use crate::{OrgError, redis_data, secrets};
 
@@ -67,11 +68,12 @@ pub async fn login_callback(code: String) -> Redirect {
 
 pub async fn get_records(session: &str) -> Result<Vec<Record>, OrgError> {
     let rows = graph_client::get_rows(session).await?;
+    dbg!(rows.clone());
 
     let mut records = Vec::new();
     for row in rows.iter() {
         match row[0] {
-            Value::Number(_) => {
+            Number(_) => {
                 let record = try_deserialize_record(row)?;
                 records.push(record);
             }
@@ -83,13 +85,40 @@ pub async fn get_records(session: &str) -> Result<Vec<Record>, OrgError> {
             _ => return Err(OrgError::InvalidExcel()),
         }
     }
-    dbg!(rows);
 
     Ok(records)
 }
 
-//todo impl
+//todo impl number to datetime
 fn try_deserialize_record(row: &Vec<Value>) -> Result<Record, OrgError> {
+    fn try_match_string(value: &Value) -> Result<&String, OrgError> {
+        match value {
+            Value::String(string) => Ok(string),
+            _ => return Err(OrgError::InvalidExcel()),
+        }
+    }
+
+    fn try_match_opt_string(value: &Value) -> Result<Option<&String>, OrgError> {
+        let string = try_match_string(value)?;
+
+        Ok(if string.is_empty() {
+            None
+        } else {
+            Some(string)
+        })
+    }
+
+    let date_time = match &row[0] {
+        Number(number) => NaiveDateTime::new(
+            NaiveDate::from_num_days_from_ce(0),
+            NaiveTime::from_hms(0, 0, 0),
+        ),
+        _ => return Err(OrgError::InvalidExcel()),
+    };
+    let transaction_code = try_match_string(&row[0])?;
+    let transaction_subcode = try_match_string(&row[1])?;
+    let symbol = try_match_opt_string(&row[2])?;
+
     panic!()
 }
 

@@ -32,6 +32,7 @@ impl Display for OrgError {
                 write!(f, "Microsoft Drive error: {}", error_text)
             }
             OrgError::Csv(error) => write!(f, "Csv error: {}", error),
+            OrgError::InvalidExcel() => write!(f, "Invalid excel error")
         }
     }
 }
