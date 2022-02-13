@@ -1,10 +1,12 @@
 use std::collections::HashMap;
+use std::vec;
 
 use chrono::NaiveDateTime;
 use redis::Commands;
 use reqwest::Url;
 use rocket::response::Redirect;
 use serde::Deserialize;
+use serde_json::Value;
 
 use crate::{OrgError, redis_data, secrets};
 
@@ -63,13 +65,37 @@ pub async fn login_callback(code: String) -> Redirect {
     Redirect::to("/")
 }
 
-//todo impl
-pub async fn get_records(session: &str) -> Result<(), OrgError> {
+pub async fn get_records(session: &str) -> Result<Vec<Record>, OrgError> {
     let rows = graph_client::get_rows(session).await?;
 
+    let mut records = Vec::new();
+    for row in rows.iter() {
+        match row[0] {
+            Value::Number(_) => {
+                let record = try_deserialize_record(row)?;
+                records.push(record);
+            }
+            Value::String(_) => {
+                if !is_empty_row(row) {
+                    return Err(OrgError::InvalidExcel());
+                }
+            }
+            _ => return Err(OrgError::InvalidExcel()),
+        }
+    }
     dbg!(rows);
 
-    Ok(())
+    Ok(records)
+}
+
+//todo impl
+fn try_deserialize_record(row: &Vec<Value>) -> Result<Record, OrgError> {
+    panic!()
+}
+
+//todo impl
+fn is_empty_row(row: &Vec<Value>) -> bool {
+    true
 }
 
 //todo code looks bad
@@ -88,7 +114,9 @@ pub async fn upload_records(session: &str, records: &Vec<Record>) -> Result<(), 
     let mut values = "{\"values\": [".to_string();
     for record in records.iter() {
         let mut string = "[".to_string();
-        string.push_str(format_str(&record.date_time.format("%d.%m.%y %I:%M %p").to_string()).as_str());
+        string.push_str(
+            format_str(&record.date_time.format("%d.%m.%y %I:%M %p").to_string()).as_str(),
+        );
         string.push_str(", ");
         string.push_str(format_str(&record.transaction_code).as_str());
         string.push_str(", ");

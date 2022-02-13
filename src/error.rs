@@ -16,6 +16,8 @@ pub enum OrgError {
     MicrosoftDrive404,
     MicrosoftDrive(String),
     Csv(csv::Error),
+    //todo add more info
+    InvalidExcel(),
 }
 
 impl Display for OrgError {
