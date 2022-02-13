@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use chrono::{DateTime, NaiveDateTime, Utc};
+use chrono::NaiveDateTime;
 use redis::Commands;
 use reqwest::Url;
 use rocket::response::Redirect;
@@ -67,6 +67,8 @@ pub async fn login_callback(code: String) -> Redirect {
 pub async fn get_records(session: &str) -> Result<(), OrgError> {
     let rows = graph_client::get_rows(session).await?;
 
+    dbg!(rows);
+
     Ok(())
 }
 
@@ -86,8 +88,7 @@ pub async fn upload_records(session: &str, records: &Vec<Record>) -> Result<(), 
     let mut values = "{\"values\": [".to_string();
     for record in records.iter() {
         let mut string = "[".to_string();
-        //todo fix tostring here
-        string.push_str(format_str(&record.date_time.to_string()).as_str());
+        string.push_str(format_str(&record.date_time.format("%d.%m.%y %I:%M %p").to_string()).as_str());
         string.push_str(", ");
         string.push_str(format_str(&record.transaction_code).as_str());
         string.push_str(", ");
