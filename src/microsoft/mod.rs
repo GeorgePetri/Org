@@ -7,7 +7,6 @@ use reqwest::Url;
 use rocket::response::Redirect;
 use serde::Deserialize;
 use serde_json::Value;
-use Value::Number;
 
 use crate::{OrgError, redis_data, secrets};
 
@@ -73,7 +72,7 @@ pub async fn get_records(session: &str) -> Result<Vec<Record>, OrgError> {
     let mut records = Vec::new();
     for row in rows.iter() {
         match row[0] {
-            Number(_) => {
+            Value::Number(_) => {
                 let record = try_deserialize_record(row)?;
                 records.push(record);
             }
@@ -109,7 +108,7 @@ fn try_deserialize_record(row: &[Value]) -> Result<Record, OrgError> {
     }
 
     let date_time = match &row[0] {
-        Number(number) => NaiveDateTime::new(
+        Value::Number(number) => NaiveDateTime::new(
             NaiveDate::from_num_days_from_ce(0),
             NaiveTime::from_hms(0, 0, 0),
         ),
@@ -118,6 +117,14 @@ fn try_deserialize_record(row: &[Value]) -> Result<Record, OrgError> {
     let transaction_code = try_match_string(&row[0])?;
     let transaction_subcode = try_match_string(&row[1])?;
     let symbol = try_match_opt_string(&row[2])?;
+    let buy_sell = try_match_opt_string(&row[3])?;
+    let open_close = try_match_opt_string(&row[4])?;
+    //todo proper type
+    let quantity = match &row[5] {
+        Value::Number(number) => { number }
+        _ => return Err(OrgError::InvalidExcel()),
+    };
+    let price = try_match_opt_string(&row[6])?;
 
     panic!()
 }
