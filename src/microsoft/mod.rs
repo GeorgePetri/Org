@@ -90,7 +90,7 @@ pub async fn get_records(session: &str) -> Result<Vec<Record>, OrgError> {
 }
 
 //todo impl number to datetime
-fn try_deserialize_record(row: &Vec<Value>) -> Result<Record, OrgError> {
+fn try_deserialize_record(row: &[Value]) -> Result<Record, OrgError> {
     fn try_match_string(value: &Value) -> Result<&String, OrgError> {
         match value {
             Value::String(string) => Ok(string),
@@ -123,7 +123,7 @@ fn try_deserialize_record(row: &Vec<Value>) -> Result<Record, OrgError> {
 }
 
 //todo write unit test
-fn is_empty_row(row: &Vec<Value>) -> bool {
+fn is_empty_row(row: &[Value]) -> bool {
     for value in row {
         match value {
             Value::String(string) => {
@@ -140,7 +140,7 @@ fn is_empty_row(row: &Vec<Value>) -> bool {
 
 //todo code looks bad
 //todo try using a serializer
-pub async fn upload_records(session: &str, records: &Vec<Record>) -> Result<(), OrgError> {
+pub async fn upload_records(session: &str, records: &[Record]) -> Result<(), OrgError> {
     fn format_str(string: &String) -> String {
         format!("\"{}\"", string)
     }
