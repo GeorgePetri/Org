@@ -115,7 +115,7 @@ fn try_deserialize_record(row: &[Value]) -> Result<Record, OrgError> {
     let open_close = try_match_opt_string(&row[5])?;
     //todo proper type
     let quantity = match &row[6] {
-        Value::Number(number) => { 4 as i64 }
+        Value::Number(number) => 4 as i64,
         _ => return Err(OrgError::InvalidExcel()),
     };
     //todo proper type
@@ -127,7 +127,20 @@ fn try_deserialize_record(row: &[Value]) -> Result<Record, OrgError> {
     let description = try_match_string(&row[10])?;
     let account_reference = try_match_string(&row[11])?;
 
-    Ok(Record { date_time, transaction_code, transaction_subcode, symbol, buy_sell, open_close, quantity, price, fees, amount, description, account_reference })
+    Ok(Record {
+        date_time,
+        transaction_code,
+        transaction_subcode,
+        symbol,
+        buy_sell,
+        open_close,
+        quantity,
+        price,
+        fees,
+        amount,
+        description,
+        account_reference,
+    })
 }
 
 //todo write unit test
