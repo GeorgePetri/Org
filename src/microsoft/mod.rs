@@ -105,8 +105,9 @@ fn try_deserialize_record(row: &[Value]) -> Result<Record, OrgError> {
         })
     }
 
-    //todo proper code
-    let date_time = NaiveDateTime::new(NaiveDate::from_num_days_from_ce(0), NaiveTime::from_hms(0, 0, 0));
+    let date_time = try_match_string(&row[0])?;
+    //todo remove unwrap
+    let date_time = NaiveDateTime::parse_from_str(date_time.as_str(), "%d.%m.%Y %I:%M %p").unwrap();
     let transaction_code = try_match_string(&row[1])?;
     let transaction_subcode = try_match_string(&row[2])?;
     let symbol = try_match_opt_string(&row[3])?;
