@@ -117,7 +117,8 @@ fn try_deserialize_record(row: &[Value]) -> Result<Record, OrgError> {
         Value::Number(number) => { 4 as i64 }
         _ => return Err(OrgError::InvalidExcel()),
     };
-    let price = try_match_opt_string(&row[7])?;
+    //todo proper type
+    let price = Some("price".to_string());
     //todo proper type
     let fees = "fee".to_string();
     //todo proper type
