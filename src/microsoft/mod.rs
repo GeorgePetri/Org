@@ -72,13 +72,11 @@ pub async fn get_records(session: &str) -> Result<Vec<Record>, OrgError> {
     let mut records = Vec::new();
     for row in rows.iter() {
         match row[0] {
-            Value::Number(_) => {
-                let record = try_deserialize_record(row)?;
-                records.push(record);
-            }
             Value::String(_) => {
                 if !is_empty_row(row) {
-                    return Err(OrgError::InvalidExcel());
+                    let record = try_deserialize_record(row)?;
+                    dbg!(&record);
+                    records.push(record);
                 }
             }
             _ => return Err(OrgError::InvalidExcel()),
@@ -107,28 +105,25 @@ fn try_deserialize_record(row: &[Value]) -> Result<Record, OrgError> {
         })
     }
 
-    let date_time = match &row[0] {
-        Value::Number(number) => NaiveDateTime::new(
-            NaiveDate::from_num_days_from_ce(0),
-            NaiveTime::from_hms(0, 0, 0),
-        ),
-        _ => return Err(OrgError::InvalidExcel()),
-    };
-    let transaction_code = try_match_string(&row[0])?;
-    let transaction_subcode = try_match_string(&row[1])?;
-    let symbol = try_match_opt_string(&row[2])?;
-    let buy_sell = try_match_opt_string(&row[3])?;
-    let open_close = try_match_opt_string(&row[4])?;
+    //todo proper code
+    let date_time = NaiveDateTime::new(NaiveDate::from_num_days_from_ce(0), NaiveTime::from_hms(0, 0, 0));
+    let transaction_code = try_match_string(&row[1])?;
+    let transaction_subcode = try_match_string(&row[2])?;
+    let symbol = try_match_opt_string(&row[3])?;
+    let buy_sell = try_match_opt_string(&row[5])?;
+    let open_close = try_match_opt_string(&row[5])?;
     //todo proper type
-    let quantity = match &row[5] {
+    let quantity = match &row[6] {
         Value::Number(number) => { 4 as i64 }
         _ => return Err(OrgError::InvalidExcel()),
     };
-    let price = try_match_opt_string(&row[6])?;
-    let fees = try_match_string(&row[6])?;
-    let amount = try_match_string(&row[6])?;
-    let description = try_match_string(&row[6])?;
-    let account_reference = try_match_string(&row[6])?;
+    let price = try_match_opt_string(&row[7])?;
+    //todo proper type
+    let fees = "fee".to_string();
+    //todo proper type
+    let amount = "amount".to_string();
+    let description = try_match_string(&row[10])?;
+    let account_reference = try_match_string(&row[11])?;
 
     Ok(Record { date_time, transaction_code, transaction_subcode, symbol, buy_sell, open_close, quantity, price, fees, amount, description, account_reference })
 }
@@ -214,6 +209,7 @@ struct Token {
 
 //todo move since this isn't msft specific
 //todo should these fields be &str?
+#[derive(Debug)]
 pub struct Record {
     pub date_time: NaiveDateTime,
     pub transaction_code: String,
