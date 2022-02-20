@@ -90,20 +90,20 @@ pub async fn get_records(session: &str) -> Result<Vec<Record>, OrgError> {
 
 //todo impl number to datetime
 fn try_deserialize_record(row: &[Value]) -> Result<Record, OrgError> {
-    fn try_match_string(value: &Value) -> Result<&String, OrgError> {
+    fn try_match_string(value: &Value) -> Result<String, OrgError> {
         match value {
-            Value::String(string) => Ok(string),
+            Value::String(string) => Ok(string.clone()),
             _ => return Err(OrgError::InvalidExcel()),
         }
     }
 
-    fn try_match_opt_string(value: &Value) -> Result<Option<&String>, OrgError> {
+    fn try_match_opt_string(value: &Value) -> Result<Option<String>, OrgError> {
         let string = try_match_string(value)?;
 
         Ok(if string.is_empty() {
             None
         } else {
-            Some(string)
+            Some(string.clone())
         })
     }
 
@@ -121,12 +121,16 @@ fn try_deserialize_record(row: &[Value]) -> Result<Record, OrgError> {
     let open_close = try_match_opt_string(&row[4])?;
     //todo proper type
     let quantity = match &row[5] {
-        Value::Number(number) => { number }
+        Value::Number(number) => { 4 as i64 }
         _ => return Err(OrgError::InvalidExcel()),
     };
     let price = try_match_opt_string(&row[6])?;
+    let fees = try_match_string(&row[6])?;
+    let amount = try_match_string(&row[6])?;
+    let description = try_match_string(&row[6])?;
+    let account_reference = try_match_string(&row[6])?;
 
-    panic!()
+    Ok(Record { date_time, transaction_code, transaction_subcode, symbol, buy_sell, open_close, quantity, price, fees, amount, description, account_reference })
 }
 
 //todo write unit test
