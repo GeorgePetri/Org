@@ -6,7 +6,7 @@ use redis::Commands;
 use reqwest::Url;
 use rocket::response::Redirect;
 use serde::Deserialize;
-use serde_json::Value;
+use serde_json::{Number, Value};
 
 use crate::{OrgError, redis_data, secrets};
 
@@ -86,7 +86,6 @@ pub async fn get_records(session: &str) -> Result<Vec<Record>, OrgError> {
     Ok(records)
 }
 
-//todo impl number to datetime
 fn try_deserialize_record(row: &[Value]) -> Result<Record, OrgError> {
     fn try_match_string(value: &Value) -> Result<String, OrgError> {
         match value {
@@ -113,17 +112,21 @@ fn try_deserialize_record(row: &[Value]) -> Result<Record, OrgError> {
     let symbol = try_match_opt_string(&row[3])?;
     let buy_sell = try_match_opt_string(&row[5])?;
     let open_close = try_match_opt_string(&row[5])?;
-    //todo proper type
     let quantity = match &row[6] {
-        Value::Number(number) => 4 as i64,
+        Value::Number(number) => match number.as_i64() {
+            Some(value) => value,
+            None => return Err(OrgError::InvalidExcel()),
+        },
         _ => return Err(OrgError::InvalidExcel()),
     };
     //todo proper type
     let price = Some("price".to_string());
     //todo proper type
     let fees = "fee".to_string();
-    //todo proper type
-    let amount = "amount".to_string();
+    let amount = match &row[9] {
+        Value::Number(number) => number.to_string(),
+        _ => return Err(OrgError::InvalidExcel()),
+    };
     let description = try_match_string(&row[10])?;
     let account_reference = try_match_string(&row[11])?;
 
