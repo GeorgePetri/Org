@@ -64,16 +64,17 @@ pub async fn upload(form: Form<FileUploadForm<'_>>) -> Result<Redirect, OrgError
         },
     };
 
-    microsoft::get_records(&session).await?;
-    upload_new_data(&session, path).await?;
+    let old_records = microsoft::get_records(&session).await?;
+    let new_records = build_records(path)?;
+    let records_to_upload = diff_records(&old_records, &new_records);
+    microsoft::upload_records(&session, records_to_upload).await?;
     microsoft::close_session(&session).await?;
     // }
 
     Ok(Redirect::to(uri!("/")))
 }
 
-//todo does table need to auto grow?
-async fn upload_new_data(session: &str, path: &Path) -> Result<(), OrgError> {
+fn build_records(path: &Path) -> Result<Vec<Record>, OrgError> {
     let mut reader = csv::Reader::from_path(path)?;
 
     let mut records = Vec::new();
@@ -82,9 +83,12 @@ async fn upload_new_data(session: &str, path: &Path) -> Result<(), OrgError> {
         records.push(result.to_record());
     }
 
-    microsoft::upload_records(session, &records).await?;
+    Ok(records)
+}
 
-    Ok(())
+//todo impl
+fn diff_records<'a>(left: &'a [Record], right: &'a [Record]) -> &'a [Record] {
+    right
 }
 
 //todo add tests
@@ -146,7 +150,8 @@ struct TastyworksRecord {
 //todo remove unwrap, use error
 impl TastyworksRecord {
     fn to_record(&self) -> Record {
-        let date_time = NaiveDateTime::parse_from_str(self.date_time.as_str(), "%m/%d/%Y %I:%M %p").unwrap();
+        let date_time =
+            NaiveDateTime::parse_from_str(self.date_time.as_str(), "%m/%d/%Y %I:%M %p").unwrap();
         Record {
             date_time,
             transaction_code: self.transaction_code.clone(),
