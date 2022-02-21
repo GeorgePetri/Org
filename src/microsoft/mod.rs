@@ -130,8 +130,10 @@ fn try_deserialize_record(row: &[Value]) -> Result<Record, OrgError> {
         Value::Number(number) => Some(number.to_string()),
         _ => return Err(OrgError::InvalidExcel()),
     };
-    //todo proper type
-    let fees = "fee".to_string();
+    let fees = match &row[8] {
+        Value::Number(number) => number.to_string(),
+        _ => return Err(OrgError::InvalidExcel()),
+    };
     let amount = match &row[9] {
         Value::Number(number) => number.to_string(),
         _ => return Err(OrgError::InvalidExcel()),
