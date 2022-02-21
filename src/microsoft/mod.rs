@@ -119,8 +119,17 @@ fn try_deserialize_record(row: &[Value]) -> Result<Record, OrgError> {
         },
         _ => return Err(OrgError::InvalidExcel()),
     };
-    //todo proper type
-    let price = Some("price".to_string());
+    let price = match &row[7] {
+        Value::String(string) => {
+            if string.is_empty() {
+                None
+            } else {
+                Some(string.clone())
+            }
+        },
+        Value::Number(number) => Some(number.to_string()),
+        _ => return Err(OrgError::InvalidExcel()),
+    };
     //todo proper type
     let fees = "fee".to_string();
     let amount = match &row[9] {
