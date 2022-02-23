@@ -88,7 +88,7 @@ fn build_records(path: &Path) -> Result<Vec<Record>, OrgError> {
     Ok(records)
 }
 
-fn diff_records<'a>(old: Vec<Record>, new: Vec<Record>) -> Vec<Record> {
+fn diff_records(old: Vec<Record>, new: Vec<Record>) -> Vec<Record> {
     let old: HashSet<Record> = HashSet::from_iter(old);
 
     let mut result = Vec::new();
@@ -99,8 +99,6 @@ fn diff_records<'a>(old: Vec<Record>, new: Vec<Record>) -> Vec<Record> {
         if !old.contains(&record) {
             println!("not contains {:?}", record);
             result.push(record);
-        } else {
-            println!("contains {:?}", record);
         }
     }
 

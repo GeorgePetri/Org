@@ -109,7 +109,7 @@ fn try_deserialize_record(row: &[Value]) -> Result<Record, OrgError> {
     let transaction_code = try_match_string(&row[1])?;
     let transaction_subcode = try_match_string(&row[2])?;
     let symbol = try_match_opt_string(&row[3])?;
-    let buy_sell = try_match_opt_string(&row[5])?;
+    let buy_sell = try_match_opt_string(&row[4])?;
     let open_close = try_match_opt_string(&row[5])?;
     let quantity = match &row[6] {
         Value::Number(number) => match number.as_i64() {
@@ -176,6 +176,10 @@ fn is_empty_row(row: &[Value]) -> bool {
 //todo code looks bad
 //todo try using a serializer
 pub async fn upload_records(session: &str, records: Vec<Record>) -> Result<(), OrgError> {
+    if records.is_empty() {
+        return Ok(())
+    }
+
     fn format_str(string: String) -> String {
         format!("\"{}\"", string)
     }
