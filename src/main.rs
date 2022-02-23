@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate rocket;
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use std::path::Path;
 
 use chrono::NaiveDateTime;
