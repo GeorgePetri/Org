@@ -11,6 +11,7 @@ use rocket::fs::{NamedFile, TempFile};
 use rocket::http::ContentType;
 use rocket::response::Redirect;
 use serde::Deserialize;
+use serde_json::Number;
 
 use crate::error::OrgError;
 use crate::microsoft::Record;
@@ -92,9 +93,14 @@ fn diff_records<'a>(old: Vec<Record>, new: Vec<Record>) -> Vec<Record> {
 
     let mut result = Vec::new();
 
+    dbg!(&old);
+
     for record in new {
         if !old.contains(&record) {
+            println!("not contains {:?}", record);
             result.push(record);
+        } else {
+            println!("contains {:?}", record);
         }
     }
 
@@ -146,7 +152,7 @@ struct TastyworksRecord {
     #[serde(rename = "Price")]
     price: Option<String>,
     #[serde(rename = "Fees")]
-    fees: String,
+    fees: Number,
     #[serde(rename = "Amount")]
     amount: String,
     #[serde(rename = "Description")]
@@ -159,22 +165,23 @@ struct TastyworksRecord {
 //todo timezone info
 //todo remove unwrap, use error
 impl TastyworksRecord {
-    fn to_record(&self) -> Record {
+    fn to_record(self) -> Record {
         let date_time =
             NaiveDateTime::parse_from_str(self.date_time.as_str(), "%m/%d/%Y %I:%M %p").unwrap();
         Record {
             date_time,
-            transaction_code: self.transaction_code.clone(),
-            transaction_subcode: self.transaction_subcode.clone(),
-            symbol: self.symbol.clone(),
-            buy_sell: self.buy_sell.clone(),
-            open_close: self.open_close.clone(),
+            transaction_code: self.transaction_code,
+            transaction_subcode: self.transaction_subcode,
+            symbol: self.symbol,
+            buy_sell: self.buy_sell,
+            open_close: self.open_close,
             quantity: self.quantity,
-            price: self.price.clone(),
-            fees: self.fees.clone(),
-            amount: self.amount.clone(),
-            description: self.description.clone(),
-            account_reference: self.account_reference.clone(),
+            price: self.price,
+            //todo fix unwrap
+            fees: self.fees.as_f64().unwrap().to_string(),
+            amount: self.amount,
+            description: self.description,
+            account_reference: self.account_reference,
         }
     }
 }

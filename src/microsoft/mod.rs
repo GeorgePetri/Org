@@ -105,7 +105,7 @@ fn try_deserialize_record(row: &[Value]) -> Result<Record, OrgError> {
 
     let date_time = try_match_string(&row[0])?;
     //todo remove unwrap
-    let date_time = NaiveDateTime::parse_from_str(date_time.as_str(), "%d.%m.%Y %I:%M %p").unwrap();
+    let date_time = NaiveDateTime::parse_from_str(date_time.as_str(), "%d.%m.%y %I:%M %p").unwrap();
     let transaction_code = try_match_string(&row[1])?;
     let transaction_subcode = try_match_string(&row[2])?;
     let symbol = try_match_opt_string(&row[3])?;
@@ -130,7 +130,8 @@ fn try_deserialize_record(row: &[Value]) -> Result<Record, OrgError> {
         _ => return Err(OrgError::InvalidExcel()),
     };
     let fees = match &row[8] {
-        Value::Number(number) => number.to_string(),
+        //todo fix unwrap
+        Value::Number(number) => number.as_f64().unwrap().to_string(),
         _ => return Err(OrgError::InvalidExcel()),
     };
     let amount = match &row[9] {
@@ -247,6 +248,7 @@ pub struct Record {
     pub open_close: Option<String>,
     pub quantity: i64,
     pub price: Option<String>,
+    //todo fix fees type
     pub fees: String,
     pub amount: String,
     pub description: String,
