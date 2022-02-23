@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate rocket;
 
+use std::collections::{HashMap, HashSet};
 use std::path::Path;
 
 use chrono::NaiveDateTime;
@@ -66,7 +67,7 @@ pub async fn upload(form: Form<FileUploadForm<'_>>) -> Result<Redirect, OrgError
 
     let old_records = microsoft::get_records(&session).await?;
     let new_records = build_records(path)?;
-    let records_to_upload = diff_records(&old_records, &new_records);
+    let records_to_upload = diff_records(old_records, new_records);
     microsoft::upload_records(&session, records_to_upload).await?;
     microsoft::close_session(&session).await?;
     // }
@@ -86,9 +87,18 @@ fn build_records(path: &Path) -> Result<Vec<Record>, OrgError> {
     Ok(records)
 }
 
-//todo impl
-fn diff_records<'a>(left: &'a [Record], right: &'a [Record]) -> &'a [Record] {
-    right
+fn diff_records<'a>(old: Vec<Record>, new: Vec<Record>) -> Vec<Record> {
+    let old: HashSet<Record> = HashSet::from_iter(old);
+
+    let mut result = Vec::new();
+
+    for record in new {
+        if !old.contains(&record) {
+            result.push(record);
+        }
+    }
+
+    result
 }
 
 //todo add tests

@@ -68,7 +68,6 @@ pub async fn login_callback(code: String) -> Redirect {
 //todo remove dbg
 pub async fn get_records(session: &str) -> Result<Vec<Record>, OrgError> {
     let rows = graph_client::get_rows(session).await?;
-    dbg!(rows.clone());
 
     let mut records = Vec::new();
     for row in rows.iter() {
@@ -76,7 +75,6 @@ pub async fn get_records(session: &str) -> Result<Vec<Record>, OrgError> {
             Value::String(_) => {
                 if !is_empty_row(row) {
                     let record = try_deserialize_record(row)?;
-                    dbg!(&record);
                     records.push(record);
                 }
             }
@@ -127,7 +125,7 @@ fn try_deserialize_record(row: &[Value]) -> Result<Record, OrgError> {
             } else {
                 Some(string.clone())
             }
-        },
+        }
         Value::Number(number) => Some(number.to_string()),
         _ => return Err(OrgError::InvalidExcel()),
     };
@@ -176,11 +174,11 @@ fn is_empty_row(row: &[Value]) -> bool {
 
 //todo code looks bad
 //todo try using a serializer
-pub async fn upload_records(session: &str, records: &[Record]) -> Result<(), OrgError> {
-    fn format_str(string: &String) -> String {
+pub async fn upload_records(session: &str, records: Vec<Record>) -> Result<(), OrgError> {
+    fn format_str(string: String) -> String {
         format!("\"{}\"", string)
     }
-    fn format_option(option: &Option<String>) -> String {
+    fn format_option(option: Option<String>) -> String {
         match option {
             None => "null".to_string(),
             Some(value) => format_str(value),
@@ -188,33 +186,33 @@ pub async fn upload_records(session: &str, records: &[Record]) -> Result<(), Org
     }
 
     let mut values = "{\"values\": [".to_string();
-    for record in records.iter() {
+    for record in records.into_iter() {
         let mut string = "[".to_string();
         string.push_str(
-            format_str(&record.date_time.format("%d.%m.%y %I:%M %p").to_string()).as_str(),
+            format_str(record.date_time.format("%d.%m.%y %I:%M %p").to_string()).as_str(),
         );
         string.push_str(", ");
-        string.push_str(format_str(&record.transaction_code).as_str());
+        string.push_str(format_str(record.transaction_code).as_str());
         string.push_str(", ");
-        string.push_str(format_str(&record.transaction_subcode).as_str());
+        string.push_str(format_str(record.transaction_subcode).as_str());
         string.push_str(", ");
-        string.push_str(format_option(&record.symbol).as_str());
+        string.push_str(format_option(record.symbol).as_str());
         string.push_str(", ");
-        string.push_str(format_option(&record.buy_sell).as_str());
+        string.push_str(format_option(record.buy_sell).as_str());
         string.push_str(", ");
-        string.push_str(format_option(&record.open_close).as_str());
+        string.push_str(format_option(record.open_close).as_str());
         string.push_str(", ");
         string.push_str(record.quantity.to_string().as_str());
         string.push_str(", ");
-        string.push_str(format_option(&record.price).as_str());
+        string.push_str(format_option(record.price).as_str());
         string.push_str(", ");
-        string.push_str(format_str(&record.fees).as_str());
+        string.push_str(format_str(record.fees).as_str());
         string.push_str(", ");
-        string.push_str(format_str(&record.amount).as_str());
+        string.push_str(format_str(record.amount).as_str());
         string.push_str(", ");
-        string.push_str(format_str(&record.description).as_str());
+        string.push_str(format_str(record.description).as_str());
         string.push_str(", ");
-        string.push_str(format_str(&record.account_reference).as_str());
+        string.push_str(format_str(record.account_reference).as_str());
         string.push_str("]");
 
         values.push_str(&string);
@@ -239,7 +237,7 @@ struct Token {
 
 //todo move since this isn't msft specific
 //todo should these fields be &str?
-#[derive(Debug)]
+#[derive(Hash, PartialEq, Eq, Debug)]
 pub struct Record {
     pub date_time: NaiveDateTime,
     pub transaction_code: String,
