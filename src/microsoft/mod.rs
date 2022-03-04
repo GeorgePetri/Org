@@ -65,7 +65,6 @@ pub async fn login_callback(code: String) -> Redirect {
     Redirect::to("/")
 }
 
-//todo remove dbg
 pub async fn get_records(session: &str) -> Result<Vec<Record>, OrgError> {
     let rows = graph_client::get_rows(session).await?;
 

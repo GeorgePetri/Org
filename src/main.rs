@@ -28,11 +28,6 @@ pub struct FileUploadForm<'f> {
     file: TempFile<'f>,
 }
 
-//use a persistent session for manipulating the excel
-//create the excel there, if not existing
-//create a worksheet if not existing
-//merge uploaded data in excel
-//save and close session
 #[post("/upload", data = "<form>")]
 pub async fn upload(form: Form<FileUploadForm<'_>>) -> Result<Redirect, OrgError> {
     let path = form.file.path().ok_or(OrgError::BadTempPath)?;
