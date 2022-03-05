@@ -101,6 +101,7 @@ fn diff_records(old: Vec<Record>, new: Vec<Record>) -> Vec<Record> {
 }
 
 //todo add tests
+//todo use src/lib.rs file structure.because it helps adding integration tests
 #[launch]
 fn rocket() -> Rocket<Build> {
     rocket::build().mount(
@@ -154,7 +155,6 @@ struct TastyworksRecord {
     account_reference: String,
 }
 
-//todo this clones don't look good, should they change?
 //todo timezone info
 //todo remove unwrap, use error
 impl TastyworksRecord {
