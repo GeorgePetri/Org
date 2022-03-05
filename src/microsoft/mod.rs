@@ -156,7 +156,6 @@ fn try_deserialize_record(row: &[Value]) -> Result<Record, OrgError> {
     })
 }
 
-//todo write unit test
 fn is_empty_row(row: &[Value]) -> bool {
     for value in row {
         match value {
@@ -180,7 +179,7 @@ pub async fn upload_records(session: &str, records: Vec<Record>) -> Result<(), O
     }
 
     fn format_str(string: String) -> String {
-        format!("\"{}\"", string)
+        format!("\"{string}\"")
     }
     fn format_option(option: Option<String>) -> String {
         match option {

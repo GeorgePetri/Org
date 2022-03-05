@@ -39,7 +39,7 @@ pub async fn upload(form: Form<FileUploadForm<'_>>) -> Result<Redirect, OrgError
         .extension()
         .ok_or(OrgError::BadTempPath)?
         .as_str();
-    let name = format!("{}.{}", name_without_extension, extension);
+    let name = format!("{name_without_extension}.{extension}");
 
     let already_exists = microsoft::file_exists(path, &name).await?;
 
@@ -83,6 +83,7 @@ fn build_records(path: &Path) -> Result<Vec<Record>, OrgError> {
     Ok(records)
 }
 
+//todo remove debug info
 fn diff_records(old: Vec<Record>, new: Vec<Record>) -> Vec<Record> {
     let old: HashSet<Record> = HashSet::from_iter(old);
 
@@ -92,7 +93,7 @@ fn diff_records(old: Vec<Record>, new: Vec<Record>) -> Vec<Record> {
 
     for record in new {
         if !old.contains(&record) {
-            println!("not contains {:?}", record);
+            println!("not contains {record:?}");
             result.push(record);
         }
     }

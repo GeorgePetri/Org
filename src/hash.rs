@@ -24,6 +24,6 @@ pub fn digest_to_upper_hex(digest: Digest) -> String {
     digest
         .as_ref()
         .iter()
-        .map(|e| format!("{:02X}", e))
+        .map(|e| format!("{e:02X}"))
         .fold(String::new(), |string, current| string + &current)
 }

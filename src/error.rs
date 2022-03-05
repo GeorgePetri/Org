@@ -25,13 +25,13 @@ impl Display for OrgError {
         match self {
             OrgError::BadTempPath => write!(f, "File could not be found at the temp location"),
             OrgError::MissingName => write!(f, "Invalid name"),
-            OrgError::Io(error) => write!(f, "IO error: {}", error),
-            OrgError::Reqwest(error) => write!(f, "Reqwest error: {}", error),
+            OrgError::Io(error) => write!(f, "IO error: {error}"),
+            OrgError::Reqwest(error) => write!(f, "Reqwest error: {error}"),
             OrgError::MicrosoftDrive404 => write!(f, "Microsoft Drive error 404"),
             OrgError::MicrosoftDrive(error_text) => {
-                write!(f, "Microsoft Drive error: {}", error_text)
+                write!(f, "Microsoft Drive error: {error_text}")
             }
-            OrgError::Csv(error) => write!(f, "Csv error: {}", error),
+            OrgError::Csv(error) => write!(f, "Csv error: {error}"),
             OrgError::InvalidExcel() => write!(f, "Invalid excel error")
         }
     }

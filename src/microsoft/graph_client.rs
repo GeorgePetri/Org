@@ -41,10 +41,7 @@ pub async fn create_ledger() -> Result<(), OrgError> {
 pub async fn file_exists(path: &Path, name: &str) -> Result<bool, OrgError> {
     let client = reqwest::Client::new();
 
-    let uri = format!(
-        "https://graph.microsoft.com/v1.0/me/drive/root:/org/source/{}",
-        name
-    );
+    let uri = format!("https://graph.microsoft.com/v1.0/me/drive/root:/org/source/{name}");
     let response = client
         .get(uri)
         .bearer_auth(redis_data::access_token())
@@ -75,10 +72,7 @@ pub async fn file_exists(path: &Path, name: &str) -> Result<bool, OrgError> {
 pub async fn upload_to_source(path: &Path, name: &str) -> Result<(), OrgError> {
     let file = fs::read(&path)?;
 
-    let uri = format!(
-        "https://graph.microsoft.com/v1.0/me/drive/root:/org/source/{}:/content",
-        name
-    );
+    let uri = format!("https://graph.microsoft.com/v1.0/me/drive/root:/org/source/{name}:/content");
 
     let client = reqwest::Client::new();
     let response = client
@@ -185,9 +179,7 @@ pub async fn get_rows(session: &str) -> Result<Vec<Vec<Value>>, OrgError> {
 
     let json: Response = response.json().await?;
 
-    let result: Vec<Vec<Value>> = json.value.iter()
-        .map(|v| v.values[0].clone())
-        .collect();
+    let result: Vec<Vec<Value>> = json.value.iter().map(|v| v.values[0].clone()).collect();
 
     Ok(result)
 }
