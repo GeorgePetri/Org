@@ -176,7 +176,7 @@ fn is_empty_row(row: &[Value]) -> bool {
 //todo try using a serializer
 pub async fn upload_records(session: &str, records: Vec<Record>) -> Result<(), OrgError> {
     if records.is_empty() {
-        return Ok(())
+        return Ok(());
     }
 
     fn format_str(string: String) -> String {
@@ -260,8 +260,15 @@ pub struct Record {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
     #[test]
     fn it_works() {
         assert_eq!(2 + 2, 3);
+    }
+
+    #[test]
+    fn is_empty_row_returns_true_when_empty_input() {
+        //todo
     }
 }

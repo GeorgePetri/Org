@@ -1,0 +1,10 @@
+FROM rust:1.57
+
+WORKDIR /app
+COPY .cargo ./.cargo
+COPY Cargo.toml Cargo.lock ./
+COPY src ./src
+
+RUN cargo test
+
+CMD ["echo", "Tests ran sucessfully."]
