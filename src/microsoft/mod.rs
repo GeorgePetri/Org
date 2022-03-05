@@ -262,9 +262,10 @@ pub struct Record {
 mod tests {
     use super::*;
 
+    //todo remove
     #[test]
     fn it_works() {
-        assert_eq!(2 + 2, 3);
+        assert_eq!(2 + 2, 4);
     }
 
     #[test]
