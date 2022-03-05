@@ -20,6 +20,7 @@ env:
 jobs:
   # Run tests.
   test:
+    name: Test
     runs-on: ubuntu-latest
 
     steps:
@@ -29,20 +30,11 @@ jobs:
       - name: Run Tests
         run: docker build . --file Dockerfile-tests
 
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Build
-        run: docker build . --file Dockerfile
-
   # Push image to GitHub Packages.
   # See also https://docs.docker.com/docker-hub/builds/
   push:
-    needs: [ test, build ]
+    name: Build and Push
+    needs: test
 
     runs-on: ubuntu-latest
     permissions:
