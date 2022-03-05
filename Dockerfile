@@ -1,4 +1,4 @@
-FROM rust:1.57 as build
+FROM rust:1.59 as build
 
 RUN rustup target add aarch64-unknown-linux-gnu
 RUN apt-get update && apt-get -y install gcc-aarch64-linux-gnu
