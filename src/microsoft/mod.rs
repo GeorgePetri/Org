@@ -261,14 +261,27 @@ pub struct Record {
 mod tests {
     use super::*;
 
-    //todo remove
     #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
+    fn is_empty_row_returns_true_when_empty_input() {
+        let x: Vec<Value> = [0..10]
+            .iter()
+            .map(|_| Value::String("".to_string()))
+            .collect();
+
+        let result = is_empty_row(&x);
+
+        assert!(result)
     }
 
     #[test]
-    fn is_empty_row_returns_true_when_empty_input() {
-        //todo
+    fn is_empty_row_returns_false_when_not_empty_input() {
+        let x: Vec<Value> = [0..10]
+            .iter()
+            .map(|_| Value::String("a".to_string()))
+            .collect();
+
+        let result = is_empty_row(&x);
+
+        assert!(!result)
     }
 }
