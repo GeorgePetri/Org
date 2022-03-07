@@ -18,12 +18,27 @@ pub fn sha256_digest<R: Read>(mut reader: R) -> Result<Digest, io::Error> {
     Ok(context.finish())
 }
 
-
-//todo add tests for this
 pub fn digest_to_upper_hex(digest: Digest) -> String {
-    digest
-        .as_ref()
-        .iter()
+    bytes_to_upper_hex(digest.as_ref())
+}
+
+fn bytes_to_upper_hex(data: &[u8]) -> String {
+    data.iter()
         .map(|e| format!("{e:02X}"))
         .fold(String::new(), |string, current| string + &current)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn bytes_to_upper_hex_return_correct_values() {
+        let data = vec![0x0f, 0x00, 0x05, 0xff];
+
+        let result = bytes_to_upper_hex(&data);
+
+        //adds leading 0
+        assert_eq!("0F0005FF", result);
+    }
 }
